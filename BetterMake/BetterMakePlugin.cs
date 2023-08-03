@@ -11,7 +11,10 @@ public class BetterMakePlugin : TaiwuRemakePlugin
     #region Config
     public static bool AttainmentRequirementReduce = false;
     public static bool UpgradeMakeItem = false;
+    public static int BuildingSpaceExtra = 0;
     #endregion
+
+    private bool gameLoaded = false;
 
     private Harmony? harmony;
 
@@ -29,6 +32,24 @@ public class BetterMakePlugin : TaiwuRemakePlugin
     public override void OnModSettingUpdate()
     {
         loadModSetting();
+        UpdateBuildingSpaceExtra();
+    }
+
+    public override void OnLoadedArchiveData()
+    {
+        gameLoaded = true;
+        UpdateBuildingSpaceExtra();
+    }
+
+    /// <summary>
+    /// 更新额外建造空间
+    /// </summary>
+    private void UpdateBuildingSpaceExtra()
+    {
+        if (gameLoaded)
+        {
+            DomainManager.Taiwu.SetBuildingSpaceExtraAdd(BuildingSpaceExtra, DomainManager.TaiwuEvent.MainThreadDataContext);
+        }
     }
 
     /// <summary>
@@ -38,6 +59,7 @@ public class BetterMakePlugin : TaiwuRemakePlugin
     {
         DomainManager.Mod.GetSetting(base.ModIdStr, nameof(AttainmentRequirementReduce), ref AttainmentRequirementReduce);
         DomainManager.Mod.GetSetting(base.ModIdStr, nameof(UpgradeMakeItem), ref UpgradeMakeItem);
+        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(BuildingSpaceExtra), ref BuildingSpaceExtra);
     }
 
     /// <summary>

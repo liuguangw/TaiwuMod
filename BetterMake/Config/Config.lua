@@ -9,8 +9,10 @@ return {
 --	FileId = 3011575950,
 	Source = 1,
 	Description = [[
-降低制造时的造诣要求(可选择是否开启)
-无需额外建筑，也能制作更好的物品(可选择是否开启)
+以下均可按需要开启或者关闭
+降低制造时的造诣要求
+无需额外建筑，也能制作更好的物品
+太吾村额外建造空间，增加额外的建筑空间上限
 	]],
 	GameVersion = "0.0.63.42",
 	DefaultSettings = 
@@ -28,6 +30,15 @@ return {
 			DisplayName = "无需额外建筑",
 			Key = "UpgradeMakeItem",
 			DefaultValue = false
-		}
+		},
+		[3] = {
+			SettingType = "Slider",
+			DisplayName = "太吾村额外建造空间",
+			Key = "BuildingSpaceExtra",
+			DefaultValue = 0,
+			MinValue = 0,
+			MaxValue = 200,
+			Description = "增加太吾村的额外建筑空间上限,为0时保持原版",
+		},
 	}
 }
