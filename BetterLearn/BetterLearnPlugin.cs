@@ -1,7 +1,5 @@
 ﻿using HarmonyLib;
 using TaiwuModdingLib.Core.Plugin;
-using Config;
-using GameData.Common;
 using GameData.Domains;
 using GameData.Domains.Taiwu;
 //using GameData.Utilities;
