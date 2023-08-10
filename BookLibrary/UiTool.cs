@@ -59,19 +59,19 @@ internal static class UiTool
     /// <param name="btnText"></param>
     /// <param name="name"></param>
     /// <returns></returns>
-    public static GameObject CreateButtonObject(Color backgroundColor,string btnText, string name = "")
+    public static GameObject CreateButtonObject(Color backgroundColor, string btnText, string name = "")
     {
         var btnObject = CreateRectObject(backgroundColor, name);
         btnObject.AddComponent<Button>();
         var textObject = CreateRectObject("Text");
         textObject.transform.SetParent(btnObject.transform);
         var rect = textObject.GetComponent<RectTransform>();
-        if(rect != null)
+        if (rect != null)
         {
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;  
+            rect.offsetMax = Vector2.zero;
         }
         var textComponent = textObject.AddComponent<Text>();
         InitText(textComponent);

@@ -11,9 +11,49 @@ internal class CombatSkillWindow
     private readonly List<GameObject> sectTypeBtnObjects = new();
     private int skillType = -1;
     private int sectType = -1;
+
+    /// <summary>
+    /// 每页最多显示多少条
+    /// </summary>
+    private readonly int maxItemsLimit = 20;
+    /// <summary>
+    /// 当前页的筛选结果
+    /// </summary>
+    private readonly List<CombatSkillItem> currentItems = new(20);
+    /// <summary>
+    /// 当前是第几页
+    /// </summary>
+    private int currentPage = 1;
+    /// <summary>
+    /// 总共有多少条记录
+    /// </summary>
+    private int itemTotalCount = 0;
+    /// <summary>
+    /// 总共有多少页
+    /// </summary>
+    private int itemTotalPage
+    {
+        get
+        {
+            var totalPage = itemTotalCount / maxItemsLimit;
+            if ((itemTotalCount % maxItemsLimit) > 0)
+            {
+                totalPage++;
+            }
+            return totalPage;
+        }
+    }
+
+    #region ui
+    private GameObject? bookListContainer;
+    private Button? prevButton;
+    private Button? nextButton;
+    private Text? pageText;
+    #endregion
+
     public void InitUI(GameObject parent)
     {
-        rootObject = UiTool.CreateRectObject("#333333".HexStringToColor(), "CombatSkillWindow");
+        rootObject = UiTool.CreateRectObject("CombatSkillWindow");
         rootObject.SetActive(false);
         rootObject.transform.SetParent(parent.transform);
         var rect = rootObject.GetComponent<RectTransform>();
@@ -28,8 +68,11 @@ internal class CombatSkillWindow
         }
         AddSkillTypeNav(rootObject);
         AddSectTypeNav(rootObject);
+        AddBookListContainer(rootObject);
+        AddPageBtns(rootObject);
         ActiveSkillType(0);
         ActiveSectType(0);
+        LoadPageItems();
     }
 
     public void SetActive(bool active)
@@ -71,7 +114,12 @@ internal class CombatSkillWindow
             skillTypeBtnObjects.Add(skillTypeBtnObject);
             var btnComponent = skillTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
-            btnComponent.onClick.AddListener(() => ActiveSkillType(btnIndex));
+            btnComponent.onClick.AddListener(() =>
+            {
+                ActiveSkillType(btnIndex);
+                currentPage = 1;
+                LoadPageItems();
+            });
         }
 
     }
@@ -125,7 +173,12 @@ internal class CombatSkillWindow
             sectTypeBtnObjects.Add(sectTypeBtnObject);
             var btnComponent = sectTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
-            btnComponent.onClick.AddListener(() => ActiveSectType(btnIndex));
+            btnComponent.onClick.AddListener(() =>
+            {
+                ActiveSectType(btnIndex);
+                currentPage = 1;
+                LoadPageItems();
+            });
         }
 
     }
@@ -146,4 +199,171 @@ internal class CombatSkillWindow
         }
     }
 
+    /// <summary>
+    /// 书籍列表区
+    /// </summary>
+    /// <param name="parent"></param>
+    private void AddBookListContainer(GameObject parent)
+    {
+        bookListContainer = UiTool.CreateRectObject("#333333".HexStringToColor(), "BookListContainer");
+        bookListContainer.transform.SetParent(parent.transform);
+        var rect = bookListContainer.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            //底部和顶部留下固定距离
+            var navHeight = 30;
+            rect.offsetMin = new(0, navHeight + 5);
+            rect.offsetMax = new(0, -2 * navHeight - 10);
+        }
+        var layout = bookListContainer.AddComponent<GridLayoutGroup>();
+        layout.spacing = new(5.0f, 5.0f);
+    }
+
+    /// <summary>
+    /// 添加翻页按钮
+    /// </summary>
+    /// <param name="parent"></param>
+    private void AddPageBtns(GameObject parent)
+    {
+        var pageBtnsObject = UiTool.CreateRectObject("PageBtns");
+        pageBtnsObject.transform.SetParent(parent.transform);
+        var rect = pageBtnsObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent的右下角
+            rect.anchorMin = Vector2.right;
+            rect.anchorMax = Vector2.right;
+            //固定大小
+            var (areaWidth, areaHeight) = (190, 30);
+            rect.SetSize(new(areaWidth, areaHeight));
+            rect.anchoredPosition = new(-areaWidth / 2, areaHeight / 2);
+        }
+        var layout = pageBtnsObject.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 5.0f;
+        //添加按钮
+        var prevBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "上一页", "PrevPageBtn");
+        prevBtnObject.transform.SetParent(pageBtnsObject.transform);
+        prevButton = prevBtnObject.GetComponent<Button>();
+        prevButton.onClick.AddListener(() =>
+        {
+            currentPage -= 1;
+            LoadPageItems();
+        });
+        var pageTextObject = UiTool.CreateRectObject("PageText");
+        var text = pageTextObject.AddComponent<Text>();
+        UiTool.InitText(text);
+        text.text = "1/10";
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.white;
+        pageText = text;
+        pageTextObject.transform.SetParent(pageBtnsObject.transform);
+        var nextBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "下一页", "NextPageBtn");
+        nextBtnObject.transform.SetParent(pageBtnsObject.transform);
+        nextButton = nextBtnObject.GetComponent<Button>();
+        nextButton.onClick.AddListener(() =>
+        {
+            currentPage += 1;
+            LoadPageItems();
+        });
+    }
+
+    /// <summary>
+    /// 筛选规则
+    /// </summary>
+    /// <param name="combatSkillItem"></param>
+    /// <returns></returns>
+    private bool FilterBook(CombatSkillItem combatSkillItem)
+    {
+        if (combatSkillItem.BookId < 0)
+        {
+            return false;
+        }
+        if ((skillType > 0) && (skillType - 1 != combatSkillItem.Type))
+        {
+            return false;
+        }
+        if ((sectType > 0) && (sectType - 1 != combatSkillItem.SectId))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private void LoadPageItems()
+    {
+        itemTotalCount = CombatSkill.Instance.Where(FilterBook).Count();
+        if (currentPage > itemTotalPage)
+        {
+            currentPage = 1;
+        }
+        //
+        var offset = (currentPage - 1) * maxItemsLimit;
+        currentItems.Clear();
+        foreach (var item in CombatSkill.Instance.Where(FilterBook).Skip(offset).Take(maxItemsLimit))
+        {
+            currentItems.Add(item);
+        }
+        UpdatePageUi();
+    }
+
+    /// <summary>
+    /// 帅选完成后,更新界面ui
+    /// </summary>
+    private void UpdatePageUi()
+    {
+        //清理已经存在的书籍列表
+        var existsItemCount = bookListContainer!.transform.childCount;
+        for (var i = existsItemCount - 1; i >= 0; i--)
+        {
+            var tmpItem = bookListContainer.transform.GetChild(i).gameObject;
+            UnityEngine.Object.DestroyImmediate(tmpItem);
+        }
+        //添加新的书籍
+        for (int i = 0; i < currentItems.Count; i++)
+        {
+            var bookNodeObject = CreateBookNode(i, currentItems[i]);
+            bookNodeObject.transform.SetParent(bookListContainer.transform);
+        }
+        //翻页按钮的状态更新
+        if (prevButton != null)
+        {
+            prevButton.enabled = currentPage > 1;
+        }
+        if (nextButton != null)
+        {
+            nextButton.enabled = currentPage < itemTotalPage;
+        }
+        //页码文本更新
+        if (pageText != null)
+        {
+            pageText.text = $"{currentPage}/{itemTotalPage}";
+        }
+    }
+
+    private GameObject CreateBookNode(int index, CombatSkillItem combatSkillItem)
+    {
+        var bookObject = UiTool.CreateRectObject("#b3ae8c".HexStringToColor(), $"Book{index}");
+        var textObject = UiTool.CreateRectObject("Text");
+        textObject.transform.SetParent(bookObject.transform);
+        var rect = textObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            //底部留出20的间距
+            rect.offsetMin = new(0, 20);
+            rect.offsetMax = Vector2.zero;
+        }
+        //
+        var text = textObject.AddComponent<Text>();
+        UiTool.InitText(text);
+        text.text = combatSkillItem.Name;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = Color.red;
+        return bookObject;
+    }
 }
