@@ -7,6 +7,9 @@ internal class MainWindow
 {
 
     private GameObject? rootObject;
+    private readonly List<GameObject> bookTypeBtnObjects = new(2);
+    private int bookType = -1;
+    private readonly CombatSkillWindow combatSkillWindow = new CombatSkillWindow();
 
     public void InitUI()
     {
@@ -14,6 +17,7 @@ internal class MainWindow
         rootObject.SetActive(false);
         var mainPanel = CreateMainPanel(rootObject, "#1c1c1c".HexStringToColor());
         AddMainTitle(mainPanel, "太吾出版社");
+        AddMainContainer(mainPanel);
         AddCloseButton(mainPanel);
     }
 
@@ -56,7 +60,7 @@ internal class MainWindow
 
     private GameObject CreateMainPanel(GameObject parent, Color bgColor)
     {
-        var mainPanel = CreateRectObject(bgColor, "MainPanel");
+        var mainPanel = UiTool.CreateRectObject(bgColor, "MainPanel");
         mainPanel.transform.SetParent(parent.transform);
         var rect = mainPanel.GetComponent<RectTransform>();
         if (rect != null)
@@ -75,7 +79,7 @@ internal class MainWindow
     {
         var btnSize = 30;
         //创建关闭按钮
-        var btnObj = CreateRectObject("#ff0000".HexStringToColor(), "CloseBtn");
+        var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
         btnObj.transform.SetParent(parent.transform);
         var rect = btnObj.GetComponent<RectTransform>();
         if (rect != null)
@@ -84,12 +88,11 @@ internal class MainWindow
             rect.anchorMin = Vector2.one;
             rect.anchorMax = Vector2.one;
             //设置关闭按钮的大小
-            rect.SetWidth(btnSize);
-            rect.SetHeight(btnSize);
+            rect.SetSize(new(btnSize, btnSize));
             //按钮中心点相对于锚点的定位
             rect.anchoredPosition = new(-btnSize / 2, -btnSize / 2);
         }
-        var closeBtn = btnObj.AddComponent<Button>();
+        var closeBtn = btnObj.GetComponent<Button>();
         //颜色
         var btnColors = closeBtn.colors;
         btnColors.normalColor = new(1.0f, 0f, 0f, 0.5f);
@@ -98,21 +101,12 @@ internal class MainWindow
         closeBtn.colors = btnColors;
         //
         closeBtn.onClick.AddListener(SwitchActiveStatus);
-        //
-        var textObject = CreateRectObject("Text");
-        textObject.transform.SetParent(btnObj.transform);
-        textObject.transform.localPosition = Vector3.zero;
-        var textComponent = textObject.AddComponent<Text>();
-        InitText(textComponent);
-        textComponent.text = "X";
-        textComponent.alignment = TextAnchor.MiddleCenter;
-        textComponent.color = "#ffffff".HexStringToColor();
     }
 
     private void AddMainTitle(GameObject parent, string title)
     {
 
-        var titlePanel = CreateRectObject("#302a28".HexStringToColor(), "TitlePanel");
+        var titlePanel = UiTool.CreateRectObject("#302a28".HexStringToColor(), "TitlePanel");
         titlePanel.transform.SetParent(parent.transform);
         var rect = titlePanel.GetComponent<RectTransform>();
         if (rect != null)
@@ -125,54 +119,83 @@ internal class MainWindow
             rect.offsetMin = new(0, -30);
             rect.offsetMax = new(0, 0);
         }
-        var textObject = CreateRectObject("Text");
+        var textObject = UiTool.CreateRectObject("Text");
         textObject.transform.SetParent(titlePanel.transform);
         textObject.transform.localPosition = Vector3.zero;
         var textComponent = textObject.AddComponent<Text>();
-        InitText(textComponent);
+        UiTool.InitText(textComponent);
         textComponent.text = title;
         textComponent.alignment = TextAnchor.MiddleCenter;
         textComponent.color = "#e1d1af".HexStringToColor();
     }
 
-    /// <summary>
-    /// 创建一个矩形物体
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    private GameObject CreateRectObject(string name = "")
+    private void AddMainContainer(GameObject parent)
     {
-        var obj = new GameObject();
-        if (!string.IsNullOrEmpty(name))
+        var mainContainer = UiTool.CreateRectObject("MainContainer");
+        mainContainer.transform.SetParent(parent.transform);
+        var rect = mainContainer.GetComponent<RectTransform>();
+        if (rect != null)
         {
-            obj.name = name;
+            //锚点为parent的四条边线
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            //设置间距
+            var padding = 8;
+            rect.offsetMin = new(padding, padding);
+            rect.offsetMax = new(-padding, -padding - 30);
         }
-        obj.AddComponent<RectTransform>();
-        return obj;
+        string[] bookTypeList = { "功法书", "技艺书" };
+        AddBookTypeNav(mainContainer, bookTypeList);
+        combatSkillWindow.InitUI(mainContainer);
+        ActiveBookType(0);
     }
 
-    /// <summary>
-    /// 带背景颜色的矩形
-    /// </summary>
-    /// <param name="backgroundColor"></param>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    private GameObject CreateRectObject(Color backgroundColor, string name = "")
+    private void AddBookTypeNav(GameObject parent, string[] bookTypeList)
     {
-        var obj = CreateRectObject(name);
-        var image = obj.AddComponent<Image>();
-        image.type = Image.Type.Sliced;
-        image.color = backgroundColor;
-        return obj;
+        var bookTypeNav = UiTool.CreateRectObject("BookTypeNav");
+        bookTypeNav.transform.SetParent(parent.transform);
+        var rect = bookTypeNav.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent的左上角
+            rect.anchorMin = Vector2.up;//(0,1)
+            rect.anchorMax = Vector2.up;//(0,1)
+            //固定bookTypeNav大小
+            var navWidth = 156;
+            var navHeight = 34;
+            rect.SetSize(new(navWidth, navHeight));
+            //距离
+            rect.anchoredPosition = new(navWidth / 2, -navHeight / 2);
+        }
+        var layout = bookTypeNav.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 5.0f;
+        for (var index = 0; index < bookTypeList.Length; index++)
+        {
+            var bookTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), bookTypeList[index], $"BookType-{index}");
+            bookTypeBtnObject.transform.SetParent(bookTypeNav.transform);
+            bookTypeBtnObjects.Add(bookTypeBtnObject);
+            var btnComponent = bookTypeBtnObject.GetComponent<Button>();
+            var btnIndex = index;
+            btnComponent.onClick.AddListener(() => ActiveBookType(btnIndex));
+        }
+
     }
 
-    /// <summary>
-    /// 设置默认的字体属性
-    /// </summary>
-    /// <param name="textComponent"></param>
-    private void InitText(Text textComponent)
+    private void ActiveBookType(int bookTypeIndex)
     {
-        textComponent.fontSize = 16;
-        textComponent.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        if (bookTypeIndex == bookType)
+        {
+            return;
+        }
+        bookType = bookTypeIndex;
+        for (var index = 0; index < bookTypeBtnObjects.Count; index++)
+        {
+            var bookTypeBtnObject = bookTypeBtnObjects[index];
+            var image = bookTypeBtnObject.GetComponent<Image>();
+            var imageColor = (bookType == index) ? "#ed991c" : "#9b886d";
+            image.color = imageColor.HexStringToColor();
+        }
+        combatSkillWindow.SetActive(bookType == 0);
     }
+
 }
