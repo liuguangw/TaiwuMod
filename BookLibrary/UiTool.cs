@@ -1,7 +1,6 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
 using UnityEngine;
 using UnityEngine.UI;
-
 namespace Liuguang.mod.Taiwu.BookLibrary;
 internal static class UiTool
 {
@@ -79,5 +78,68 @@ internal static class UiTool
         textComponent.alignment = TextAnchor.MiddleCenter;
         textComponent.color = "#ffffff".HexStringToColor();
         return btnObject;
+    }
+
+    private static GameObject CreateScrollbar()
+    {
+        var scrollbarObject = CreateRectObject(Color.black, "Scrollbar");
+        scrollbarObject.GetComponent<RectTransform>();
+        var scrollbar = scrollbarObject.AddComponent<Scrollbar>();
+        //
+        var slideObject = CreateRectObject("Sliding Area");
+        slideObject.transform.SetParent(scrollbarObject.transform);
+        var slideRect = slideObject.GetComponent<RectTransform>();
+        slideRect.anchorMin = Vector2.zero;
+        slideRect.anchorMax = Vector2.one;
+        slideRect.sizeDelta = new Vector2(-10f, -10f);
+        //
+        var handleObject = CreateRectObject(Color.blue, "Handle");
+        handleObject.transform.SetParent(slideObject.transform);
+        var handleRect = handleObject.GetComponent<RectTransform>();
+        handleRect.sizeDelta = new Vector2(10f, 10f);
+        //
+        scrollbar.handleRect = handleRect;
+        scrollbar.targetGraphic = handleObject.GetComponent<Image>();
+        return scrollbarObject;
+    }
+
+    public static GameObject CreateVerticalScrollView(string name = "")
+    {
+        var scrollView = CreateRectObject(name);
+        var viewPortObj = CreateRectObject("ViewPort");
+        viewPortObj.transform.SetParent(scrollView.transform);
+        var viewPortRect = viewPortObj.GetComponent<RectTransform>();
+        viewPortRect.anchorMin = Vector2.zero;
+        viewPortRect.anchorMax = Vector2.one;
+        viewPortRect.offsetMin = Vector2.zero;
+        viewPortRect.offsetMax = new(-25, 0);
+        //mask
+        var mask = viewPortObj.AddComponent<Mask>();
+        mask.showMaskGraphic = false;
+        var maskImage = viewPortObj.AddComponent<Image>();
+        maskImage.type = Image.Type.Sliced;
+        //
+        var contentObj = CreateRectObject("Content");
+        contentObj.transform.SetParent(viewPortObj.transform);
+        var contentRect = contentObj.GetComponent<RectTransform>();
+        var contentSizeFitter = contentObj.AddComponent<ContentSizeFitter>();
+        contentSizeFitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+        contentSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var scrollBarObj = CreateScrollbar();
+        scrollBarObj.transform.SetParent(scrollView.transform);
+        var scrollBar = scrollBarObj.GetComponent<Scrollbar>();
+        scrollBar.SetDirection(Scrollbar.Direction.BottomToTop, true);
+        var scrollBarRect = scrollBarObj.GetComponent<RectTransform>();
+        scrollBarRect.anchorMin = Vector2.right;
+        scrollBarRect.anchorMax = Vector2.one;
+        scrollBarRect.offsetMin = new(-20, 0);
+        scrollBarRect.offsetMax = Vector2.zero;
+        //
+        var scrollRect = scrollView.AddComponent<ScrollRect>();
+        scrollRect.content = contentRect;
+        scrollRect.viewport = viewPortRect;
+        scrollRect.verticalScrollbar = scrollBar;
+        scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+        return scrollView;
     }
 }

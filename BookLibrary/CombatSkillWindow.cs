@@ -205,9 +205,9 @@ internal class CombatSkillWindow
     /// <param name="parent"></param>
     private void AddBookListContainer(GameObject parent)
     {
-        bookListContainer = UiTool.CreateRectObject("#333333".HexStringToColor(), "BookListContainer");
-        bookListContainer.transform.SetParent(parent.transform);
-        var rect = bookListContainer.GetComponent<RectTransform>();
+        var bookListArea = UiTool.CreateRectObject("BookListArea");
+        bookListArea.transform.SetParent(parent.transform);
+        var rect = bookListArea.GetComponent<RectTransform>();
         if (rect != null)
         {
             //锚点为parent
@@ -218,8 +218,25 @@ internal class CombatSkillWindow
             rect.offsetMin = new(0, navHeight + 5);
             rect.offsetMax = new(0, -2 * navHeight - 10);
         }
+        //
+        var scrollViewObject = UiTool.CreateVerticalScrollView("BookListScrollView");
+        scrollViewObject.transform.SetParent(bookListArea.transform);
+        var scrollViewRect = scrollViewObject.GetComponent<RectTransform>();
+        if (scrollViewRect != null)
+        {
+            //锚点为parent
+            scrollViewRect.anchorMin = Vector2.zero;
+            scrollViewRect.anchorMax = Vector2.one;
+            scrollViewRect.offsetMin = Vector2.zero;
+            scrollViewRect.offsetMax = Vector2.zero;
+        }
+        var scrollRect = scrollViewObject.GetComponent<ScrollRect>();
+        bookListContainer = scrollRect.content.gameObject;
         var layout = bookListContainer.AddComponent<GridLayoutGroup>();
-        layout.spacing = new(5.0f, 5.0f);
+        layout.spacing = new(5, 5);
+        layout.cellSize = new(120, 120 + 20 + 10 + 30 + 10);
+        layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        layout.constraintCount = 6;
     }
 
     /// <summary>
@@ -345,25 +362,42 @@ internal class CombatSkillWindow
 
     private GameObject CreateBookNode(int index, CombatSkillItem combatSkillItem)
     {
-        var bookObject = UiTool.CreateRectObject("#b3ae8c".HexStringToColor(), $"Book{index}");
+        var bookObject = UiTool.CreateRectObject("#313331".HexStringToColor(), $"Book{index}");
+        //图标区
+        var iconObject = UiTool.CreateRectObject("Icon");
+        iconObject.transform.SetParent(bookObject.transform);
+        var iconRect = iconObject.GetComponent<RectTransform>();
+        if (iconRect != null)
+        {
+            //锚点为parent的左上角
+            iconRect.anchorMin = Vector2.up;
+            iconRect.anchorMax = Vector2.up;
+            //
+            iconRect.anchoredPosition = new(60, -60);
+            iconRect.sizeDelta = new(100, 100);
+        }
+        var iconImg = iconObject.AddComponent<CImage>();
+        iconImg.SetSprite(combatSkillItem.Icon);
+        iconImg.SetColor(Colors.Instance.FiveElementsColors[combatSkillItem.FiveElements]);
+        //文本区
         var textObject = UiTool.CreateRectObject("Text");
         textObject.transform.SetParent(bookObject.transform);
-        var rect = textObject.GetComponent<RectTransform>();
-        if (rect != null)
+        var textRect = textObject.GetComponent<RectTransform>();
+        if (textRect != null)
         {
             //锚点为parent
-            rect.anchorMin = Vector2.zero;
-            rect.anchorMax = Vector2.one;
-            //底部留出20的间距
-            rect.offsetMin = new(0, 20);
-            rect.offsetMax = Vector2.zero;
+            textRect.anchorMin = Vector2.up;
+            textRect.anchorMax = Vector2.up;
+            //
+            textRect.anchoredPosition = new(60, -120 - 10);
+            textRect.sizeDelta = new(120, 20);
         }
         //
         var text = textObject.AddComponent<Text>();
         UiTool.InitText(text);
         text.text = combatSkillItem.Name;
         text.alignment = TextAnchor.MiddleCenter;
-        text.color = Color.red;
+        text.color = Colors.Instance.GradeColors[combatSkillItem.Grade];
         return bookObject;
     }
 }
