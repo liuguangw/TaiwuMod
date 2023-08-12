@@ -2,7 +2,6 @@
 using GameData.Domains;
 using GameData.Domains.Character;
 using GameData.Domains.Item;
-using GameData.Domains.Taiwu.LifeSkillCombat.Status;
 using GameData.GameDataBridge;
 using GameData.Serializer;
 using GameData.Utilities;
@@ -28,7 +27,7 @@ public class BookLibraryBackendPlugin : TaiwuRemakePlugin
     }
 
     /// <summary>
-    /// 制作调整
+    /// 劫持CharacterDomain的CallMethod, 如果是工具调用的(5参数)则执行特别处理.
     /// </summary>
     [HarmonyPrefix]
     [HarmonyPatch(typeof(CharacterDomain), "CallMethod")]
@@ -57,9 +56,11 @@ public class BookLibraryBackendPlugin : TaiwuRemakePlugin
             {
                 CreateInventoryItem(context, charId, templateId, amount, pageTypes);
                 __result = -1;
+                //false 不继续执行原来的CallMethod函数
                 return false;
             }
         }
+        //true表示后续继续执行
         return true;
     }
 

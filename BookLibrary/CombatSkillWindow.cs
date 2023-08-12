@@ -1,8 +1,4 @@
 ﻿using Config;
-using GameData.Domains;
-using GameData.Domains.Character;
-using GameData.Domains.Item;
-using GameData.GameDataBridge;
 using UnityEngine;
 using UnityEngine.UI;
 

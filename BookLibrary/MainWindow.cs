@@ -15,7 +15,8 @@ internal class MainWindow
     {
         rootObject = CreateCanvas("taiwu.BookLibrary.root", new(1024f, 768f));
         rootObject.SetActive(false);
-        var mainPanel = CreateMainPanel(rootObject, "#1c1c1c".HexStringToColor());
+        var maskObject = CreateMask(rootObject);
+        var mainPanel = CreateMainPanel(maskObject, "#1c1c1c".HexStringToColor());
         AddMainTitle(mainPanel, "太吾出版社");
         AddMainContainer(mainPanel);
         AddCloseButton(mainPanel);
@@ -56,6 +57,29 @@ internal class MainWindow
         //
         obj.AddComponent<GraphicRaycaster>();
         return obj;
+    }
+
+    /// <summary>
+    /// 创建遮罩层
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <returns></returns>
+    private GameObject CreateMask(GameObject parent)
+    {
+        //遮罩层
+        var maskObject = UiTool.CreateRectObject(new(0, 0, 0, 0.7f), "Mask");
+        maskObject.transform.SetParent(parent.transform);
+        var rect = maskObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            //
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+        return maskObject;
     }
 
     private GameObject CreateMainPanel(GameObject parent, Color bgColor)
