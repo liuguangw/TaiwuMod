@@ -11,6 +11,7 @@ namespace Liuguang.mod.Taiwu.BookLibrary;
 internal class CombatSkillWindow
 {
     private GameObject? rootObject;
+    private CombatSkillBookDialog BookDialog = new();
     private readonly List<GameObject> skillTypeBtnObjects = new();
     private readonly List<GameObject> sectTypeBtnObjects = new();
     private int skillType = -1;
@@ -74,6 +75,7 @@ internal class CombatSkillWindow
         AddSectTypeNav(rootObject);
         AddBookListContainer(rootObject);
         AddPageBtns(rootObject);
+        BookDialog.InitUI(rootObject);
         ActiveSkillType(0);
         ActiveSectType(0);
         LoadPageItems();
@@ -421,19 +423,8 @@ internal class CombatSkillWindow
             var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
             if (playerId > 0)
             {
-                //GMFunc.GetItem(playerId, 1, ItemType.SkillBook, combatSkillItem.BookId, null);
-                byte pageTypes = 0;
-                //总纲
-                //[0 - 4]
-                pageTypes = SkillBookStateHelper.SetOutlinePageType(pageTypes, 1);
-                //剩余页面
-                for (byte pageId = 1; pageId <= 5; pageId++)
-                {
-                    //direction: 0 or 1
-                    pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, 1);
-                }
-                GameDataBridge.AddMethodCall(-1, DomainHelper.DomainIds.Character, CharacterDomainHelper.MethodIds.CreateInventoryItem,
-                playerId, ItemType.SkillBook, combatSkillItem.BookId, 1, pageTypes);
+                BookDialog.SetCombatSkillItem(combatSkillItem);
+                BookDialog.SetActive(true);
             }
         });
         return bookObject;

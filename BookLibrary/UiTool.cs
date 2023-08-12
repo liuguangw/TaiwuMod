@@ -1,6 +1,6 @@
-﻿using System.ComponentModel;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+
 namespace Liuguang.mod.Taiwu.BookLibrary;
 internal static class UiTool
 {
@@ -141,5 +141,46 @@ internal static class UiTool
         scrollRect.verticalScrollbar = scrollBar;
         scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
         return scrollView;
+    }
+
+    public static GameObject CreateInputField(Color backgroundColor, string placeholderText = "请输入...", string name = "")
+    {
+        var gameObject = CreateRectObject(backgroundColor, name);
+        var placeholderObject = CreateRectObject("Placeholder");
+        placeholderObject.transform.SetParent(gameObject.transform);
+        var textObject = CreateRectObject("Text");
+        textObject.transform.SetParent(placeholderObject.transform);
+        //
+        var inputField = gameObject.AddComponent<InputField>();
+        var text = textObject.AddComponent<Text>();
+        text.text = "";
+        text.color = "#0f0f0f".HexStringToColor();
+        text.alignment = TextAnchor.MiddleLeft;
+        text.supportRichText = false;
+        InitText(text);
+        //
+        var text2 = placeholderObject.AddComponent<Text>();
+        InitText(text2);
+        text2.text = placeholderText;
+        text2.fontStyle = FontStyle.Italic;
+        text2.alignment = TextAnchor.MiddleLeft;
+        Color color = text.color;
+        color.a *= 0.5f;
+        text2.color = color;
+        //
+        var component = textObject.GetComponent<RectTransform>();
+        component.anchorMin = Vector2.zero;
+        component.anchorMax = Vector2.one;
+        component.sizeDelta = Vector2.zero;
+        component.offsetMin = new(5, 0);
+        component.offsetMax = new(-5,0);
+        var component2 = placeholderObject.GetComponent<RectTransform>();
+        component2.anchorMin = Vector2.zero;
+        component2.anchorMax = Vector2.one;
+        component2.offsetMin = Vector2.zero;
+        component2.offsetMax = Vector2.zero;
+        inputField.textComponent = text;
+        inputField.placeholder = text2;
+        return gameObject;
     }
 }
