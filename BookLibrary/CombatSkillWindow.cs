@@ -1,4 +1,8 @@
 ﻿using Config;
+using GameData.Domains;
+using GameData.Domains.Character;
+using GameData.Domains.Item;
+using GameData.GameDataBridge;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -385,7 +389,7 @@ internal class CombatSkillWindow
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
-            //锚点为parent
+            //锚点为parent的左上角
             textRect.anchorMin = Vector2.up;
             textRect.anchorMax = Vector2.up;
             //
@@ -398,6 +402,40 @@ internal class CombatSkillWindow
         text.text = combatSkillItem.Name;
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Colors.Instance.GradeColors[combatSkillItem.Grade];
+        //按钮区
+        var createBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "获取", "CreateBookBtn");
+        createBtnObject.transform.SetParent(bookObject.transform);
+        var btnRect = createBtnObject.GetComponent<RectTransform>();
+        if (btnRect != null)
+        {
+            //锚点为parent的下边
+            btnRect.anchorMin = Vector2.zero;
+            btnRect.anchorMax = Vector2.right;
+            //
+            btnRect.offsetMin = new(10, 10);
+            btnRect.offsetMax = new(-10, 40);
+        }
+        var createBtn = createBtnObject.GetComponent<Button>();
+        createBtn.onClick.AddListener(() =>
+        {
+            var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
+            if (playerId > 0)
+            {
+                //GMFunc.GetItem(playerId, 1, ItemType.SkillBook, combatSkillItem.BookId, null);
+                byte pageTypes = 0;
+                //总纲
+                //[0 - 4]
+                pageTypes = SkillBookStateHelper.SetOutlinePageType(pageTypes, 1);
+                //剩余页面
+                for (byte pageId = 1; pageId <= 5; pageId++)
+                {
+                    //direction: 0 or 1
+                    pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, 1);
+                }
+                GameDataBridge.AddMethodCall(-1, DomainHelper.DomainIds.Character, CharacterDomainHelper.MethodIds.CreateInventoryItem,
+                playerId, ItemType.SkillBook, combatSkillItem.BookId, 1, pageTypes);
+            }
+        });
         return bookObject;
     }
 }
