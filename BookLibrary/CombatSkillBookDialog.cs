@@ -13,7 +13,7 @@ internal class CombatSkillBookDialog
     /// <summary>
     /// 要发放的书籍
     /// </summary>
-    private CombatSkillItem? combatSkillItem;
+    private CombatSkillItem? SkillItem;
     /// <summary>
     /// 总纲类型 [0 - 4]
     /// </summary>
@@ -30,7 +30,7 @@ internal class CombatSkillBookDialog
     {
         get
         {
-            return combatSkillItem?.Name ?? "未初始化书籍";
+            return SkillItem?.Name ?? "未初始化书籍";
         }
     }
 
@@ -38,11 +38,11 @@ internal class CombatSkillBookDialog
     {
         get
         {
-            if (combatSkillItem == null)
+            if (SkillItem == null)
             {
                 return Color.white;
             }
-            return Colors.Instance.GradeColors[combatSkillItem.Grade];
+            return Colors.Instance.GradeColors[SkillItem.Grade];
         }
     }
     private GameObject? rootObject;
@@ -132,9 +132,9 @@ internal class CombatSkillBookDialog
         TitleText = textComponent;
     }
 
-    public void SetCombatSkillItem(CombatSkillItem item)
+    public void SetSkillItem(CombatSkillItem item)
     {
-        combatSkillItem = item;
+        SkillItem = item;
         if (TitleText != null)
         {
             TitleText.text = BookTitle;
@@ -423,8 +423,8 @@ internal class CombatSkillBookDialog
         if (rect != null)
         {
             //锚点为右下角
-            rect.anchorMin = Vector2.right;//(0,1)
-            rect.anchorMax = Vector2.right;//(1,1)
+            rect.anchorMin = Vector2.right;//(1,0)
+            rect.anchorMax = Vector2.right;//(1,0)
             var (width, height) = (170, 40);
             rect.SetSize(new(width, height));
             rect.anchoredPosition = new(-width / 2 - 10, height / 2 + 10);
@@ -472,10 +472,10 @@ internal class CombatSkillBookDialog
             //direction: 0正 or 1逆
             pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, NormalPageTypes[pageId - 1]);
         }
-        BookApi.GetBook(playerId, combatSkillItem!.BookId, BookAmount, pageTypes);
+        BookApi.GetBook(playerId, SkillItem!.BookId, BookAmount, pageTypes);
         //关闭当前弹窗
         SetActive(false);
-        ShowTipFunc?.Invoke(0, $"获得了{combatSkillItem!.Name} * {BookAmount}");
+        ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");
     }
 
 

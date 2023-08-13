@@ -11,7 +11,8 @@ internal class MainWindow
     private Text? TipText;
     private readonly List<GameObject> bookTypeBtnObjects = new(2);
     private int bookType = -1;
-    private readonly CombatSkillWindow combatSkillWindow = new CombatSkillWindow();
+    private readonly CombatSkillWindow combatSkillWindow = new();
+    private readonly LifeSkillWindow lifeSkillWindow = new();
 
     public void InitUI()
     {
@@ -174,6 +175,7 @@ internal class MainWindow
         AddBookTypeNav(mainContainer, bookTypeList);
         AddTipArea(mainContainer);
         combatSkillWindow.InitUI(mainContainer, ShowTip);
+        lifeSkillWindow.InitUI(mainContainer, ShowTip);
         ActiveBookType(0);
     }
 
@@ -258,6 +260,7 @@ internal class MainWindow
             image.color = imageColor.HexStringToColor();
         }
         combatSkillWindow.SetActive(bookType == 0);
+        lifeSkillWindow.SetActive(bookType == 1);
     }
 
     private async void ShowTip(int tipType, string tipContent)

@@ -4,18 +4,16 @@ using UnityEngine.UI;
 
 namespace Liuguang.mod.Taiwu.BookLibrary;
 
-internal class CombatSkillWindow
+internal class LifeSkillWindow
 {
     private GameObject? rootObject;
-    private CombatSkillBookDialog BookDialog = new();
+    private LifeSkillBookDialog BookDialog = new();
     private readonly List<GameObject> SkillTypeBtnObjects = new();
-    private readonly List<GameObject> SectTypeBtnObjects = new();
     private int SkillType = -1;
-    private int SectType = -1;
     /// <summary>
     /// 当前页的筛选结果
     /// </summary>
-    private readonly List<CombatSkillItem> CurrentItems = new(20);
+    private readonly List<LifeSkillItem> CurrentItems = new(20);
     /// <summary>
     /// 分页
     /// </summary>
@@ -32,7 +30,7 @@ internal class CombatSkillWindow
 
     public void InitUI(GameObject parent, Action<int, string> showTipFunc)
     {
-        rootObject = UiTool.CreateRectObject("CombatSkillWindow");
+        rootObject = UiTool.CreateRectObject("LifeSkillWindow");
         rootObject.SetActive(false);
         rootObject.transform.SetParent(parent.transform);
         var rect = rootObject.GetComponent<RectTransform>();
@@ -47,12 +45,10 @@ internal class CombatSkillWindow
         }
         ShowTipFunc = showTipFunc;
         AddSkillTypeNav(rootObject);
-        AddSectTypeNav(rootObject);
         AddBookListContainer(rootObject);
         AddPageBtns(rootObject);
         BookDialog.InitUI(rootObject, showTipFunc);
         ActiveSkillType(0);
-        ActiveSectType(0);
         LoadPageItems();
     }
 
@@ -62,7 +58,7 @@ internal class CombatSkillWindow
     }
 
     /// <summary>
-    /// 功法类型筛选栏
+    /// 技艺类型筛选栏
     /// </summary>
     /// <param name="parent"></param>
     private void AddSkillTypeNav(GameObject parent)
@@ -82,11 +78,11 @@ internal class CombatSkillWindow
         }
         var layout = skillTypeNav.AddComponent<HorizontalLayoutGroup>();
         layout.spacing = 5.0f;
-        List<string> skillTypeList = new(CombatSkillType.Instance.Count + 1);
+        List<string> skillTypeList = new(LifeSkillType.Instance.Count + 1);
         skillTypeList.Add("全部");
-        foreach (var combatSkillTypeItem in CombatSkillType.Instance)
+        foreach (var lifeSkillTypeItem in LifeSkillType.Instance)
         {
-            skillTypeList.Add(combatSkillTypeItem.Name);
+            skillTypeList.Add(lifeSkillTypeItem.Name);
         }
         for (var index = 0; index < skillTypeList.Count; index++)
         {
@@ -117,65 +113,6 @@ internal class CombatSkillWindow
             var bookTypeBtnObject = SkillTypeBtnObjects[index];
             var image = bookTypeBtnObject.GetComponent<Image>();
             var imageColor = (SkillType == index) ? "#ed991c" : "#9b886d";
-            image.color = imageColor.HexStringToColor();
-        }
-    }
-
-    /// <summary>
-    /// 门派类型筛选栏
-    /// </summary>
-    /// <param name="parent"></param>
-    private void AddSectTypeNav(GameObject parent)
-    {
-        var sectTypeNav = UiTool.CreateRectObject("SectTypeNav");
-        sectTypeNav.transform.SetParent(parent.transform);
-        var rect = sectTypeNav.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            //锚点为parent的上边线
-            rect.anchorMin = Vector2.up;//(0,1)
-            rect.anchorMax = new(0.75f, 1.0f);
-            //固定高度
-            var navHeight = 30;
-            rect.offsetMin = new(0, -2 * navHeight - 5);
-            rect.offsetMax = new(0, -navHeight - 5);
-        }
-        var layout = sectTypeNav.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
-        List<string> sectTypeList = new() { "全", "无" };
-        foreach (var organizationItem in Organization.Instance.Where(item => item.IsSect))
-        {
-            sectTypeList.Add(organizationItem.Name.Substring(0, 1));
-        }
-        for (var index = 0; index < sectTypeList.Count; index++)
-        {
-            var sectTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), sectTypeList[index], $"SectType-{index}");
-            sectTypeBtnObject.transform.SetParent(sectTypeNav.transform);
-            SectTypeBtnObjects.Add(sectTypeBtnObject);
-            var btnComponent = sectTypeBtnObject.GetComponent<Button>();
-            var btnIndex = index;
-            btnComponent.onClick.AddListener(() =>
-            {
-                ActiveSectType(btnIndex);
-                ItemPagination.CurrentPage = 1;
-                LoadPageItems();
-            });
-        }
-
-    }
-
-    private void ActiveSectType(int sectTypeIndex)
-    {
-        if (sectTypeIndex == SectType)
-        {
-            return;
-        }
-        SectType = sectTypeIndex;
-        for (var index = 0; index < SectTypeBtnObjects.Count; index++)
-        {
-            var sectTypeBtnObject = SectTypeBtnObjects[index];
-            var image = sectTypeBtnObject.GetComponent<Image>();
-            var imageColor = (SectType == index) ? "#ed991c" : "#9b886d";
             image.color = imageColor.HexStringToColor();
         }
     }
@@ -271,19 +208,15 @@ internal class CombatSkillWindow
     /// <summary>
     /// 筛选规则
     /// </summary>
-    /// <param name="combatSkillItem"></param>
+    /// <param name="lifeSkillItem"></param>
     /// <returns></returns>
-    private bool FilterBook(CombatSkillItem combatSkillItem)
+    private bool FilterBook(LifeSkillItem lifeSkillItem)
     {
-        if (combatSkillItem.BookId < 0)
+        if (lifeSkillItem.SkillBookId < 0)
         {
             return false;
         }
-        if ((SkillType > 0) && (SkillType - 1 != combatSkillItem.Type))
-        {
-            return false;
-        }
-        if ((SectType > 0) && (SectType - 1 != combatSkillItem.SectId))
+        if ((SkillType > 0) && (SkillType - 1 != lifeSkillItem.Type))
         {
             return false;
         }
@@ -292,7 +225,7 @@ internal class CombatSkillWindow
 
     private void LoadPageItems()
     {
-        ItemPagination.ItemTotalCount = CombatSkill.Instance.Where(FilterBook).Count();
+        ItemPagination.ItemTotalCount = LifeSkill.Instance.Where(FilterBook).Count();
         if (ItemPagination.CurrentPage > ItemPagination.TotalPage)
         {
             ItemPagination.CurrentPage = 1;
@@ -300,7 +233,7 @@ internal class CombatSkillWindow
         //
         var offset = (ItemPagination.CurrentPage - 1) * ItemPagination.MaxItemsLimit;
         CurrentItems.Clear();
-        foreach (var item in CombatSkill.Instance.Where(FilterBook).Skip(offset).Take(ItemPagination.MaxItemsLimit))
+        foreach (var item in LifeSkill.Instance.Where(FilterBook).Skip(offset).Take(ItemPagination.MaxItemsLimit))
         {
             CurrentItems.Add(item);
         }
@@ -341,7 +274,7 @@ internal class CombatSkillWindow
         }
     }
 
-    private GameObject CreateBookNode(int index, CombatSkillItem combatSkillItem)
+    private GameObject CreateBookNode(int index, LifeSkillItem lifeSkillItem)
     {
         var bookObject = UiTool.CreateRectObject("#313331".HexStringToColor(), $"Book{index}");
         //图标区
@@ -358,8 +291,8 @@ internal class CombatSkillWindow
             iconRect.sizeDelta = new(100, 100);
         }
         var iconImg = iconObject.AddComponent<CImage>();
-        iconImg.SetSprite(combatSkillItem.Icon);
-        iconImg.SetColor(Colors.Instance.FiveElementsColors[combatSkillItem.FiveElements]);
+        var skillBookItem = SkillBook.Instance[lifeSkillItem.SkillBookId];
+        iconImg.SetSprite(skillBookItem.Icon);
         //文本区
         var textObject = UiTool.CreateRectObject("Text");
         textObject.transform.SetParent(bookObject.transform);
@@ -376,9 +309,9 @@ internal class CombatSkillWindow
         //
         var text = textObject.AddComponent<Text>();
         UiTool.InitText(text);
-        text.text = combatSkillItem.Name;
+        text.text = lifeSkillItem.Name;
         text.alignment = TextAnchor.MiddleCenter;
-        text.color = Colors.Instance.GradeColors[combatSkillItem.Grade];
+        text.color = Colors.Instance.GradeColors[lifeSkillItem.Grade];
         //按钮区
         var createBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "获取", "CreateBookBtn");
         createBtnObject.transform.SetParent(bookObject.transform);
@@ -398,7 +331,7 @@ internal class CombatSkillWindow
             var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
             if (playerId > 0)
             {
-                BookDialog.SetSkillItem(combatSkillItem);
+                BookDialog.SetSkillItem(lifeSkillItem);
                 BookDialog.SetActive(true);
             }
             else
