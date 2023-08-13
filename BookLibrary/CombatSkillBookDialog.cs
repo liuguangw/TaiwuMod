@@ -57,7 +57,9 @@ internal class CombatSkillBookDialog
     private Color NotActiveColor = "#515550".HexStringToColor();
     private Color ActiveColor = "#8c4882".HexStringToColor();
 
-    public void InitUI(GameObject parent)
+    private Action<int, string>? ShowTipFunc;
+
+    public void InitUI(GameObject parent, Action<int, string> showTipFunc)
     {
         //遮罩层
         rootObject = UiTool.CreateRectObject(new(0, 0, 0, 0.7f), "CombatSkillBookDialogMask");
@@ -73,6 +75,7 @@ internal class CombatSkillBookDialog
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
         }
+        ShowTipFunc = showTipFunc;
         //
         var dialogObject = UiTool.CreateRectObject("#4c4c4c".HexStringToColor(), "CombatSkillBookDialog");
         dialogObject.transform.SetParent(rootObject.transform);
@@ -453,6 +456,12 @@ internal class CombatSkillBookDialog
         var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
         if (playerId <= 0)
         {
+            ShowTipFunc?.Invoke(1, "进入游戏之后, 才能获取书籍");
+            return;
+        }
+        if (BookAmount <= 0)
+        {
+            ShowTipFunc?.Invoke(1, "数量不正确");
             return;
         }
         //GMFunc.GetItem(playerId, 1, ItemType.SkillBook, combatSkillItem.BookId, null);
@@ -470,6 +479,7 @@ internal class CombatSkillBookDialog
         playerId, ItemType.SkillBook, combatSkillItem!.BookId, BookAmount, pageTypes);
         //关闭当前弹窗
         SetActive(false);
+        ShowTipFunc?.Invoke(0, $"获得了{combatSkillItem!.Name} * {BookAmount}");
     }
 
 

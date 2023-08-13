@@ -45,6 +45,8 @@ internal class CombatSkillWindow
         }
     }
 
+    private Action<int, string>? ShowTipFunc;
+
     #region ui
     private GameObject? bookListContainer;
     private Button? prevButton;
@@ -52,7 +54,7 @@ internal class CombatSkillWindow
     private Text? pageText;
     #endregion
 
-    public void InitUI(GameObject parent)
+    public void InitUI(GameObject parent, Action<int, string> showTipFunc)
     {
         rootObject = UiTool.CreateRectObject("CombatSkillWindow");
         rootObject.SetActive(false);
@@ -67,11 +69,12 @@ internal class CombatSkillWindow
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = new(0, -42.0f);
         }
+        ShowTipFunc = showTipFunc;
         AddSkillTypeNav(rootObject);
         AddSectTypeNav(rootObject);
         AddBookListContainer(rootObject);
         AddPageBtns(rootObject);
-        BookDialog.InitUI(rootObject);
+        BookDialog.InitUI(rootObject, showTipFunc);
         ActiveSkillType(0);
         ActiveSectType(0);
         LoadPageItems();
@@ -421,6 +424,10 @@ internal class CombatSkillWindow
             {
                 BookDialog.SetCombatSkillItem(combatSkillItem);
                 BookDialog.SetActive(true);
+            }
+            else
+            {
+                ShowTipFunc?.Invoke(1, "进入游戏之后, 才能获取书籍");
             }
         });
         return bookObject;

@@ -7,6 +7,8 @@ internal class MainWindow
 {
 
     private GameObject? rootObject;
+    private GameObject? TipArea;
+    private Text? TipText;
     private readonly List<GameObject> bookTypeBtnObjects = new(2);
     private int bookType = -1;
     private readonly CombatSkillWindow combatSkillWindow = new CombatSkillWindow();
@@ -170,7 +172,8 @@ internal class MainWindow
         }
         string[] bookTypeList = { "功法书", "技艺书" };
         AddBookTypeNav(mainContainer, bookTypeList);
-        combatSkillWindow.InitUI(mainContainer);
+        AddTipArea(mainContainer);
+        combatSkillWindow.InitUI(mainContainer, ShowTip);
         ActiveBookType(0);
     }
 
@@ -205,6 +208,41 @@ internal class MainWindow
 
     }
 
+    private void AddTipArea(GameObject parent)
+    {
+        var tipAreaObject = UiTool.CreateRectObject("#198754".HexStringToColor(), "TipArea");
+        tipAreaObject.transform.SetParent(parent.transform);
+        tipAreaObject.SetActive(false);
+        var rect = tipAreaObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent的上边
+            rect.anchorMin = Vector2.up;//(0,1)
+            rect.anchorMax = Vector2.one;//(1,1)
+            //
+            rect.offsetMin = new(166, -34);
+            rect.offsetMax = Vector2.zero;
+        }
+        var textObject = UiTool.CreateRectObject("Text");
+        textObject.transform.SetParent(tipAreaObject.transform);
+        var textRect = textObject.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new(8, 0);
+            textRect.offsetMax = new(-8, 0);
+        }
+        var text = textObject.AddComponent<Text>();
+        UiTool.InitText(text);
+        text.text = "this is a tip text";
+        text.alignment = TextAnchor.MiddleLeft;
+        text.fontStyle = FontStyle.Bold;
+        //
+        TipArea = tipAreaObject;
+        TipText = text;
+    }
+
     private void ActiveBookType(int bookTypeIndex)
     {
         if (bookTypeIndex == bookType)
@@ -220,6 +258,23 @@ internal class MainWindow
             image.color = imageColor.HexStringToColor();
         }
         combatSkillWindow.SetActive(bookType == 0);
+    }
+
+    private async void ShowTip(int tipType, string tipContent)
+    {
+        if (TipArea != null)
+        {
+            var image = TipArea.GetComponent<Image>();
+            var tipBackground = (tipType == 0) ? "#198754" : "#dc3545";
+            image.color = tipBackground.HexStringToColor();
+            if (TipText != null)
+            {
+                TipText.text = tipContent;
+            }
+            TipArea.SetActive(true);
+            await Task.Delay(1600);
+            TipArea.SetActive(false);
+        }
     }
 
 }

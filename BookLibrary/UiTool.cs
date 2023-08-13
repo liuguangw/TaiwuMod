@@ -173,7 +173,7 @@ internal static class UiTool
         component.anchorMax = Vector2.one;
         component.sizeDelta = Vector2.zero;
         component.offsetMin = new(5, 0);
-        component.offsetMax = new(-5,0);
+        component.offsetMax = new(-5, 0);
         var component2 = placeholderObject.GetComponent<RectTransform>();
         component2.anchorMin = Vector2.zero;
         component2.anchorMax = Vector2.one;
