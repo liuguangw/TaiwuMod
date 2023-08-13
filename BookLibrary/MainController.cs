@@ -5,12 +5,12 @@ namespace Liuguang.mod.Taiwu.BookLibrary;
 internal class MainController : MonoBehaviour
 {
     #region HotKey
-    private static KeyCode HotKey = KeyCode.Home;
+    private static KeyCode HotKey = KeyCode.F5;
     public static void UpdateHotKey(string HotKeyText)
     {
         if (!Enum.TryParse(HotKeyText, out HotKey))
         {
-            HotKey = KeyCode.Home;
+            HotKey = KeyCode.F5;
         }
     }
     #endregion

@@ -8,42 +8,18 @@ internal class CombatSkillWindow
 {
     private GameObject? rootObject;
     private CombatSkillBookDialog BookDialog = new();
-    private readonly List<GameObject> skillTypeBtnObjects = new();
-    private readonly List<GameObject> sectTypeBtnObjects = new();
-    private int skillType = -1;
-    private int sectType = -1;
-
-    /// <summary>
-    /// 每页最多显示多少条
-    /// </summary>
-    private readonly int maxItemsLimit = 20;
+    private readonly List<GameObject> SkillTypeBtnObjects = new();
+    private readonly List<GameObject> SectTypeBtnObjects = new();
+    private int SkillType = -1;
+    private int SectType = -1;
     /// <summary>
     /// 当前页的筛选结果
     /// </summary>
-    private readonly List<CombatSkillItem> currentItems = new(20);
+    private readonly List<CombatSkillItem> CurrentItems = new(20);
     /// <summary>
-    /// 当前是第几页
+    /// 分页
     /// </summary>
-    private int currentPage = 1;
-    /// <summary>
-    /// 总共有多少条记录
-    /// </summary>
-    private int itemTotalCount = 0;
-    /// <summary>
-    /// 总共有多少页
-    /// </summary>
-    private int itemTotalPage
-    {
-        get
-        {
-            var totalPage = itemTotalCount / maxItemsLimit;
-            if ((itemTotalCount % maxItemsLimit) > 0)
-            {
-                totalPage++;
-            }
-            return totalPage;
-        }
-    }
+    private readonly Pagination ItemPagination = new(20);
 
     private Action<int, string>? ShowTipFunc;
 
@@ -116,13 +92,13 @@ internal class CombatSkillWindow
         {
             var skillTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), skillTypeList[index], $"SkillType-{index}");
             skillTypeBtnObject.transform.SetParent(skillTypeNav.transform);
-            skillTypeBtnObjects.Add(skillTypeBtnObject);
+            SkillTypeBtnObjects.Add(skillTypeBtnObject);
             var btnComponent = skillTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
             btnComponent.onClick.AddListener(() =>
             {
                 ActiveSkillType(btnIndex);
-                currentPage = 1;
+                ItemPagination.CurrentPage = 1;
                 LoadPageItems();
             });
         }
@@ -131,16 +107,16 @@ internal class CombatSkillWindow
 
     private void ActiveSkillType(int bookTypeIndex)
     {
-        if (bookTypeIndex == skillType)
+        if (bookTypeIndex == SkillType)
         {
             return;
         }
-        skillType = bookTypeIndex;
-        for (var index = 0; index < skillTypeBtnObjects.Count; index++)
+        SkillType = bookTypeIndex;
+        for (var index = 0; index < SkillTypeBtnObjects.Count; index++)
         {
-            var bookTypeBtnObject = skillTypeBtnObjects[index];
+            var bookTypeBtnObject = SkillTypeBtnObjects[index];
             var image = bookTypeBtnObject.GetComponent<Image>();
-            var imageColor = (skillType == index) ? "#ed991c" : "#9b886d";
+            var imageColor = (SkillType == index) ? "#ed991c" : "#9b886d";
             image.color = imageColor.HexStringToColor();
         }
     }
@@ -175,13 +151,13 @@ internal class CombatSkillWindow
         {
             var sectTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), sectTypeList[index], $"SectType-{index}");
             sectTypeBtnObject.transform.SetParent(sectTypeNav.transform);
-            sectTypeBtnObjects.Add(sectTypeBtnObject);
+            SectTypeBtnObjects.Add(sectTypeBtnObject);
             var btnComponent = sectTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
             btnComponent.onClick.AddListener(() =>
             {
                 ActiveSectType(btnIndex);
-                currentPage = 1;
+                ItemPagination.CurrentPage = 1;
                 LoadPageItems();
             });
         }
@@ -190,16 +166,16 @@ internal class CombatSkillWindow
 
     private void ActiveSectType(int sectTypeIndex)
     {
-        if (sectTypeIndex == sectType)
+        if (sectTypeIndex == SectType)
         {
             return;
         }
-        sectType = sectTypeIndex;
-        for (var index = 0; index < sectTypeBtnObjects.Count; index++)
+        SectType = sectTypeIndex;
+        for (var index = 0; index < SectTypeBtnObjects.Count; index++)
         {
-            var sectTypeBtnObject = sectTypeBtnObjects[index];
+            var sectTypeBtnObject = SectTypeBtnObjects[index];
             var image = sectTypeBtnObject.GetComponent<Image>();
-            var imageColor = (sectType == index) ? "#ed991c" : "#9b886d";
+            var imageColor = (SectType == index) ? "#ed991c" : "#9b886d";
             image.color = imageColor.HexStringToColor();
         }
     }
@@ -271,7 +247,7 @@ internal class CombatSkillWindow
         prevButton = prevBtnObject.GetComponent<Button>();
         prevButton.onClick.AddListener(() =>
         {
-            currentPage -= 1;
+            ItemPagination.GotoPrev();
             LoadPageItems();
         });
         var pageTextObject = UiTool.CreateRectObject("PageText");
@@ -287,7 +263,7 @@ internal class CombatSkillWindow
         nextButton = nextBtnObject.GetComponent<Button>();
         nextButton.onClick.AddListener(() =>
         {
-            currentPage += 1;
+            ItemPagination.GotoNext();
             LoadPageItems();
         });
     }
@@ -303,11 +279,11 @@ internal class CombatSkillWindow
         {
             return false;
         }
-        if ((skillType > 0) && (skillType - 1 != combatSkillItem.Type))
+        if ((SkillType > 0) && (SkillType - 1 != combatSkillItem.Type))
         {
             return false;
         }
-        if ((sectType > 0) && (sectType - 1 != combatSkillItem.SectId))
+        if ((SectType > 0) && (SectType - 1 != combatSkillItem.SectId))
         {
             return false;
         }
@@ -316,17 +292,17 @@ internal class CombatSkillWindow
 
     private void LoadPageItems()
     {
-        itemTotalCount = CombatSkill.Instance.Where(FilterBook).Count();
-        if (currentPage > itemTotalPage)
+        ItemPagination.ItemTotalCount = CombatSkill.Instance.Where(FilterBook).Count();
+        if (ItemPagination.CurrentPage > ItemPagination.TotalPage)
         {
-            currentPage = 1;
+            ItemPagination.CurrentPage = 1;
         }
         //
-        var offset = (currentPage - 1) * maxItemsLimit;
-        currentItems.Clear();
-        foreach (var item in CombatSkill.Instance.Where(FilterBook).Skip(offset).Take(maxItemsLimit))
+        var offset = (ItemPagination.CurrentPage - 1) * ItemPagination.MaxItemsLimit;
+        CurrentItems.Clear();
+        foreach (var item in CombatSkill.Instance.Where(FilterBook).Skip(offset).Take(ItemPagination.MaxItemsLimit))
         {
-            currentItems.Add(item);
+            CurrentItems.Add(item);
         }
         UpdatePageUi();
     }
@@ -344,24 +320,24 @@ internal class CombatSkillWindow
             UnityEngine.Object.DestroyImmediate(tmpItem);
         }
         //添加新的书籍
-        for (int i = 0; i < currentItems.Count; i++)
+        for (int i = 0; i < CurrentItems.Count; i++)
         {
-            var bookNodeObject = CreateBookNode(i, currentItems[i]);
+            var bookNodeObject = CreateBookNode(i, CurrentItems[i]);
             bookNodeObject.transform.SetParent(bookListContainer.transform);
         }
         //翻页按钮的状态更新
         if (prevButton != null)
         {
-            prevButton.enabled = currentPage > 1;
+            prevButton.enabled = ItemPagination.HasPrev;
         }
         if (nextButton != null)
         {
-            nextButton.enabled = currentPage < itemTotalPage;
+            nextButton.enabled = ItemPagination.HasNext;
         }
         //页码文本更新
         if (pageText != null)
         {
-            pageText.text = $"{currentPage}/{itemTotalPage}";
+            pageText.text = $"{ItemPagination.CurrentPage}/{ItemPagination.TotalPage}";
         }
     }
 
