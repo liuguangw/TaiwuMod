@@ -1,8 +1,5 @@
 ﻿using Config;
-using GameData.Domains;
-using GameData.Domains.Character;
 using GameData.Domains.Item;
-using GameData.GameDataBridge;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -475,8 +472,7 @@ internal class CombatSkillBookDialog
             //direction: 0正 or 1逆
             pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, NormalPageTypes[pageId - 1]);
         }
-        GameDataBridge.AddMethodCall(-1, DomainHelper.DomainIds.Character, CharacterDomainHelper.MethodIds.CreateInventoryItem,
-        playerId, ItemType.SkillBook, combatSkillItem!.BookId, BookAmount, pageTypes);
+        BookApi.GetBook(playerId, combatSkillItem!.BookId, BookAmount, pageTypes);
         //关闭当前弹窗
         SetActive(false);
         ShowTipFunc?.Invoke(0, $"获得了{combatSkillItem!.Name} * {BookAmount}");
