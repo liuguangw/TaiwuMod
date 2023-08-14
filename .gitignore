@@ -1,8 +1,6 @@
 /.vscode
 /.vs
 *.user
-# dll
-/libs
 
 # Build results
 bin/
