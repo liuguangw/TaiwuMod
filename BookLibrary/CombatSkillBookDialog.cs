@@ -142,11 +142,23 @@ internal class CombatSkillBookDialog
         }
     }
 
-    private void AddOutlinePages(GameObject parent)
+    /// <summary>
+    /// 添加一行篇章选择
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <param name="rowIndex">第几行,从0开始</param>
+    /// <param name="rowObjectName">对象名称</param>
+    /// <param name="pageBtnObjects">篇章按钮对象集合</param>
+    /// <param name="labelText">label文本</param>
+    /// <param name="langKey">翻译KEY前缀</param>
+    /// <param name="pageBtnTextColor">按钮的文字颜色</param>
+    /// <param name="clickAction">点击对应按钮的处理</param>
+    private void AddPagesRow(GameObject parent, int rowIndex, string rowObjectName, List<GameObject> pageBtnObjects,
+        string labelText, string langKey, Color pageBtnTextColor, Action<sbyte> clickAction)
     {
-        var pagePanel = UiTool.CreateRectObject("OutlinePagesPanel");
+        var pagePanel = UiTool.CreateRectObject(rowObjectName);
         pagePanel.transform.SetParent(parent.transform);
-        var offsetTop = 30 + 15;//标题区
+        var offsetTop = (30 + 15) * (rowIndex + 1);//距离上方的距离
         var offsetLength = 10;
         var panelHeight = 30;
         var rect = pagePanel.GetComponent<RectTransform>();
@@ -171,7 +183,7 @@ internal class CombatSkillBookDialog
         }
         var textComponent = textObject.AddComponent<Text>();
         UiTool.InitText(textComponent);
-        textComponent.text = "总纲";
+        textComponent.text = labelText;
         textComponent.alignment = TextAnchor.MiddleRight;
         //
         var pageContainerObject = UiTool.CreateRectObject("PageContainer");
@@ -188,13 +200,26 @@ internal class CombatSkillBookDialog
         layout.spacing = 5.0f;
         for (sbyte index = 0; index < 5; index++)
         {
-            var pageBtnObject = UiTool.CreateButtonObject(NotActiveColor, LocalStringManager.Get($"LK_CombatSkill_First_Page_Type_{index}"), $"PageBtn-{index}");
+            var pageBtnObject = UiTool.CreateButtonObject(NotActiveColor, LocalStringManager.Get($"{langKey}_{index}"), $"PageBtn-{index}");
             pageBtnObject.transform.SetParent(pageContainerObject.transform);
-            OutlinePageObjects.Add(pageBtnObject);
+            pageBtnObjects.Add(pageBtnObject);
+            var text = pageBtnObject.GetComponentInChildren<Text>();
+            text.color = pageBtnTextColor;
             var btnComponent = pageBtnObject.GetComponent<Button>();
             var btnIndex = index;
-            btnComponent.onClick.AddListener(() => ActiveOutlinePageType(btnIndex));
+            btnComponent.onClick.AddListener(() => clickAction.Invoke(btnIndex));
         }
+    }
+
+    /// <summary>
+    /// 总纲选择行
+    /// </summary>
+    /// <param name="parent"></param>
+    private void AddOutlinePages(GameObject parent)
+    {
+        var langKey = "LK_CombatSkill_First_Page_Type";
+        var pageBtnTextColor = Color.white;
+        AddPagesRow(parent, 0, "OutlinePagesPanel", OutlinePageObjects, "总纲", langKey, pageBtnTextColor, ActiveOutlinePageType);
     }
 
     private void ActiveOutlinePageType(sbyte btnIndex)
@@ -208,119 +233,22 @@ internal class CombatSkillBookDialog
             image.color = imageColor;
         }
     }
-
+    /// <summary>
+    /// 正练选择行
+    /// </summary>
+    /// <param name="parent"></param>
     private void AddDirectPages(GameObject parent)
     {
-        var pagePanel = UiTool.CreateRectObject("DirectPagesPanel");
-        pagePanel.transform.SetParent(parent.transform);
-        var offsetTop = (30 + 15) * 2;//距离上方的距离
-        var offsetLength = 10;
-        var panelHeight = 30;
-        var rect = pagePanel.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            //锚点为parent的上边线
-            rect.anchorMin = Vector2.up;//(0,1)
-            rect.anchorMax = Vector2.one;//(1,1)
-            rect.offsetMin = new(offsetLength, -offsetTop - panelHeight);
-            rect.offsetMax = new(-offsetLength, -offsetTop);
-        }
-        var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(pagePanel.transform);
-        var (textWidth, textHeight) = (panelHeight * 3, panelHeight);
-        var textRect = textObject.GetComponent<RectTransform>();
-        if (textRect != null)
-        {
-            textRect.anchorMin = Vector2.up;
-            textRect.anchorMax = Vector2.up;
-            textRect.SetSize(new(textWidth, textHeight));
-            textRect.anchoredPosition = new(textWidth / 2, -textHeight / 2);
-        }
-        var textComponent = textObject.AddComponent<Text>();
-        UiTool.InitText(textComponent);
-        textComponent.text = "正练篇";
-        textComponent.alignment = TextAnchor.MiddleRight;
-        //
-        var pageContainerObject = UiTool.CreateRectObject("PageContainer");
-        pageContainerObject.transform.SetParent(pagePanel.transform);
-        var containerRect = pageContainerObject.GetComponent<RectTransform>();
-        if (containerRect != null)
-        {
-            containerRect.anchorMin = Vector2.zero;
-            containerRect.anchorMax = Vector2.one;
-            containerRect.offsetMin = new(textWidth + 10, 0);
-            containerRect.offsetMax = Vector2.zero;
-        }
-        var layout = pageContainerObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
-        for (var index = 0; index < 5; index++)
-        {
-            var pageBtnObject = UiTool.CreateButtonObject(NotActiveColor, LocalStringManager.Get($"LK_CombatSkill_Direct_Page_{index}"), $"PageBtn-{index}");
-            pageBtnObject.transform.SetParent(pageContainerObject.transform);
-            DirectPageObjects.Add(pageBtnObject);
-            var text = pageBtnObject.GetComponentInChildren<Text>();
-            text.color = "#00dcdc".HexStringToColor();
-            var btnComponent = pageBtnObject.GetComponent<Button>();
-            var btnIndex = index;
-            btnComponent.onClick.AddListener(() => ActiveNormalPageType(btnIndex, 0));
-        }
+        var langKey = "LK_CombatSkill_Direct_Page";
+        var pageBtnTextColor = "#00dcdc".HexStringToColor();
+        AddPagesRow(parent, 1, "DirectPagesPanel", DirectPageObjects, "正练篇", langKey, pageBtnTextColor, btnIndex => ActiveNormalPageType(btnIndex, 0));
     }
 
     private void AddReversePages(GameObject parent)
     {
-        var pagePanel = UiTool.CreateRectObject("ReversePagesPanel");
-        pagePanel.transform.SetParent(parent.transform);
-        var offsetTop = (30 + 15) * 3;//距离上方的距离
-        var offsetLength = 10;
-        var panelHeight = 30;
-        var rect = pagePanel.GetComponent<RectTransform>();
-        if (rect != null)
-        {
-            //锚点为parent的上边线
-            rect.anchorMin = Vector2.up;//(0,1)
-            rect.anchorMax = Vector2.one;//(1,1)
-            rect.offsetMin = new(offsetLength, -offsetTop - panelHeight);
-            rect.offsetMax = new(-offsetLength, -offsetTop);
-        }
-        var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(pagePanel.transform);
-        var (textWidth, textHeight) = (panelHeight * 3, panelHeight);
-        var textRect = textObject.GetComponent<RectTransform>();
-        if (textRect != null)
-        {
-            textRect.anchorMin = Vector2.up;
-            textRect.anchorMax = Vector2.up;
-            textRect.SetSize(new(textWidth, textHeight));
-            textRect.anchoredPosition = new(textWidth / 2, -textHeight / 2);
-        }
-        var textComponent = textObject.AddComponent<Text>();
-        UiTool.InitText(textComponent);
-        textComponent.text = "逆练篇";
-        textComponent.alignment = TextAnchor.MiddleRight;
-        //
-        var pageContainerObject = UiTool.CreateRectObject("PageContainer");
-        pageContainerObject.transform.SetParent(pagePanel.transform);
-        var containerRect = pageContainerObject.GetComponent<RectTransform>();
-        if (containerRect != null)
-        {
-            containerRect.anchorMin = Vector2.zero;
-            containerRect.anchorMax = Vector2.one;
-            containerRect.offsetMin = new(textWidth + 10, 0);
-            containerRect.offsetMax = Vector2.zero;
-        }
-        var layout = pageContainerObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
-        for (var index = 0; index < 5; index++)
-        {
-            var pageBtnObject = UiTool.CreateButtonObject(NotActiveColor, LocalStringManager.Get($"LK_CombatSkill_Reverse_Page_{index}"), $"PageBtn-{index}");
-            pageBtnObject.transform.SetParent(pageContainerObject.transform);
-            ReversePageObjects.Add(pageBtnObject);
-            var text = pageBtnObject.GetComponentInChildren<Text>();
-            text.color = "#d68a00".HexStringToColor();
-            var btnComponent = pageBtnObject.GetComponent<Button>();
-            var btnIndex = index;
-            btnComponent.onClick.AddListener(() => ActiveNormalPageType(btnIndex, 1));
-        }
+        var langKey = "LK_CombatSkill_Reverse_Page";
+        var pageBtnTextColor = "#d68a00".HexStringToColor();
+        AddPagesRow(parent, 2, "ReversePagesPanel", ReversePageObjects, "逆练篇", langKey, pageBtnTextColor, btnIndex => ActiveNormalPageType(btnIndex, 1));
     }
 
     private void ActiveNormalPageType(int btnIndex, sbyte pageType)

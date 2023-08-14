@@ -13,11 +13,11 @@ internal class LifeSkillWindow
     /// <summary>
     /// 当前页的筛选结果
     /// </summary>
-    private readonly List<LifeSkillItem> CurrentItems = new(20);
+    private readonly List<LifeSkillItem> CurrentItems = new(18);
     /// <summary>
     /// 分页
     /// </summary>
-    private readonly Pagination ItemPagination = new(20);
+    private readonly Pagination ItemPagination = new(18);
 
     private Action<int, string>? ShowTipFunc;
 
