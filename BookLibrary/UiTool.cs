@@ -43,7 +43,7 @@ internal static class UiTool
     /// <param name="textComponent"></param>
     public static void InitText(Text textComponent)
     {
-        textComponent.fontSize = 16;
+        textComponent.fontSize = 27;
         if (defaultFont == null)
         {
             defaultFont = Resources.GetBuiltinResource<Font>("Arial.ttf");

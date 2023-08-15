@@ -95,7 +95,7 @@ internal class LifeSkillBookDialog
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
             //高度固定为30
-            rect.offsetMin = new(0, -30);
+            rect.offsetMin = new(0, -48);
             rect.offsetMax = new(0, 0);
         }
         var textObject = UiTool.CreateRectObject("Text");
@@ -123,9 +123,9 @@ internal class LifeSkillBookDialog
     {
         var pagePanel = UiTool.CreateRectObject("AmountInputPanel");
         pagePanel.transform.SetParent(parent.transform);
-        var offsetTop = 30 + 15;//距离上方的距离
-        var offsetLength = 10;
-        var panelHeight = 30;
+        var offsetTop = 48 + 24;//距离上方的距离
+        var offsetLength = 16;
+        var panelHeight = 48;
         var rect = pagePanel.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -158,7 +158,7 @@ internal class LifeSkillBookDialog
         {
             containerRect.anchorMin = Vector2.zero;
             containerRect.anchorMax = Vector2.one;
-            containerRect.offsetMin = new(textWidth + 10, 0);
+            containerRect.offsetMin = new(textWidth + 16, 0);
             containerRect.offsetMax = Vector2.zero;
         }
         var inputFieldObject = UiTool.CreateInputField(Color.white, "输入需要的数量", "InputField");
@@ -203,12 +203,12 @@ internal class LifeSkillBookDialog
             //锚点为右下角
             rect.anchorMin = Vector2.right;//(1,0)
             rect.anchorMax = Vector2.right;//(1,0)
-            var (width, height) = (170, 40);
+            var (width, height) = (272, 64);
             rect.SetSize(new(width, height));
-            rect.anchoredPosition = new(-width / 2 - 10, height / 2 + 10);
+            rect.anchoredPosition = new(-width / 2 - 16, height / 2 + 16);
         }
         var layout = btnPanel.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 10;
+        layout.spacing = 16;
         var cancelBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "取消", "CancelBtn");
         cancelBtnObject.transform.SetParent(btnPanel.transform);
         var confirmBtnObject = UiTool.CreateButtonObject("#ed991c".HexStringToColor(), "确定", "ConfirmBtn");
@@ -248,7 +248,7 @@ internal class LifeSkillBookDialog
 
     private void AddCloseButton(GameObject parent)
     {
-        var btnSize = 30;
+        var btnSize = 48;
         //创建关闭按钮
         var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
         btnObj.transform.SetParent(parent.transform);

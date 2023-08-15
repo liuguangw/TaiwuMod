@@ -1,4 +1,7 @@
-﻿using Config;
+﻿using BookLibrary;
+using Config;
+using FrameWork;
+using GameData.Domains.Item.Display;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,9 +42,9 @@ internal class LifeSkillWindow
             //锚点为parent的四条边
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
-            //与上边距离42
+            //与上边距离
             rect.offsetMin = Vector2.zero;
-            rect.offsetMax = new(0, -42.0f);
+            rect.offsetMax = new(0, -67.2f);
         }
         ShowTipFunc = showTipFunc;
         AddSkillTypeNav(rootObject);
@@ -72,12 +75,12 @@ internal class LifeSkillWindow
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
             //固定高度
-            var navHeight = 30;
+            var navHeight = 48;
             rect.offsetMin = new(0, -navHeight);
             rect.offsetMax = Vector2.zero;
         }
         var layout = skillTypeNav.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         List<string> skillTypeList = new(LifeSkillType.Instance.Count + 1);
         skillTypeList.Add("全部");
         foreach (var lifeSkillTypeItem in LifeSkillType.Instance)
@@ -132,9 +135,9 @@ internal class LifeSkillWindow
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             //底部和顶部留下固定距离
-            var navHeight = 30;
-            rect.offsetMin = new(0, navHeight + 5);
-            rect.offsetMax = new(0, -2 * navHeight - 10);
+            var navHeight = 48;
+            rect.offsetMin = new(0, navHeight + 8);
+            rect.offsetMax = new(0, -navHeight - 8);
         }
         //
         var scrollViewObject = UiTool.CreateVerticalScrollView("BookListScrollView");
@@ -151,8 +154,8 @@ internal class LifeSkillWindow
         var scrollRect = scrollViewObject.GetComponent<ScrollRect>();
         bookListContainer = scrollRect.content.gameObject;
         var layout = bookListContainer.AddComponent<GridLayoutGroup>();
-        layout.spacing = new(5, 5);
-        layout.cellSize = new(120, 120 + 20 + 10 + 30 + 10);
+        layout.spacing = new(8, 8);
+        layout.cellSize = new(192, 192 + 32 + 16 + 48 + 16);
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.constraintCount = 6;
     }
@@ -172,12 +175,12 @@ internal class LifeSkillWindow
             rect.anchorMin = Vector2.right;
             rect.anchorMax = Vector2.right;
             //固定大小
-            var (areaWidth, areaHeight) = (190, 30);
+            var (areaWidth, areaHeight) = (304, 48);
             rect.SetSize(new(areaWidth, areaHeight));
             rect.anchoredPosition = new(-areaWidth / 2, areaHeight / 2);
         }
         var layout = pageBtnsObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         //添加按钮
         var prevBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "上一页", "PrevPageBtn");
         prevBtnObject.transform.SetParent(pageBtnsObject.transform);
@@ -257,6 +260,7 @@ internal class LifeSkillWindow
         {
             var bookNodeObject = CreateBookNode(i, CurrentItems[i]);
             bookNodeObject.transform.SetParent(bookListContainer.transform);
+            bookNodeObject.transform.localScale = Vector3.one;
         }
         //翻页按钮的状态更新
         if (prevButton != null)
@@ -277,9 +281,47 @@ internal class LifeSkillWindow
     private GameObject CreateBookNode(int index, LifeSkillItem lifeSkillItem)
     {
         var bookObject = UiTool.CreateRectObject("#313331".HexStringToColor(), $"Book{index}");
+        //鼠标悬浮区
+        var mouseAreaObject = UiTool.CreateRectObject("MouseArea");
+        mouseAreaObject.transform.SetParent(bookObject.transform);
+        var rect = mouseAreaObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent的左上角
+            rect.anchorMin = Vector2.up;
+            rect.anchorMax = Vector2.up;
+            //
+            var (width, height) = (192, 192 + 32);
+            rect.anchoredPosition = new(width / 2, -height / 2);
+            rect.sizeDelta = new(width, height);
+        }
+        var mouseArea = mouseAreaObject.AddComponent<MouseArea>();
+        var mouseTipManager = SingletonObject.getInstance<MouseTipManager>();
+        mouseArea.EnterAction = () =>
+        {
+            var skillBookConfig = SkillBook.Instance[lifeSkillItem.SkillBookId];
+            var itemData = new ItemDisplayData()
+            {
+                Key = new(skillBookConfig.ItemType, 0, lifeSkillItem.SkillBookId, 0),
+                Amount = 1,
+                Durability = skillBookConfig.MaxDurability,
+                MaxDurability = skillBookConfig.MaxDurability,
+                Weight = skillBookConfig.BaseWeight,
+                Value = skillBookConfig.BaseValue,
+            };
+            var argsBox = new ArgumentBox();
+            argsBox.Set("ItemData", itemData);
+            argsBox.Set("ShowPageInfo", false);
+            argsBox.Set("templateDataOnly", false);
+            mouseTipManager.ShowTips(TipType.SkillBook, argsBox);
+        };
+        mouseArea.ExitAction = () =>
+        {
+            mouseTipManager.HideTips(TipType.SkillBook);
+        };
         //图标区
         var iconObject = UiTool.CreateRectObject("Icon");
-        iconObject.transform.SetParent(bookObject.transform);
+        iconObject.transform.SetParent(mouseAreaObject.transform);
         var iconRect = iconObject.GetComponent<RectTransform>();
         if (iconRect != null)
         {
@@ -287,15 +329,15 @@ internal class LifeSkillWindow
             iconRect.anchorMin = Vector2.up;
             iconRect.anchorMax = Vector2.up;
             //
-            iconRect.anchoredPosition = new(60, -60);
-            iconRect.sizeDelta = new(100, 100);
+            iconRect.anchoredPosition = new(96, -96);
+            iconRect.sizeDelta = new(160, 160);
         }
         var iconImg = iconObject.AddComponent<CImage>();
         var skillBookItem = SkillBook.Instance[lifeSkillItem.SkillBookId];
         iconImg.SetSprite(skillBookItem.Icon);
         //文本区
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(bookObject.transform);
+        textObject.transform.SetParent(mouseAreaObject.transform);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
@@ -303,8 +345,8 @@ internal class LifeSkillWindow
             textRect.anchorMin = Vector2.up;
             textRect.anchorMax = Vector2.up;
             //
-            textRect.anchoredPosition = new(60, -120 - 10);
-            textRect.sizeDelta = new(120, 20);
+            textRect.anchoredPosition = new(96, -192 - 16);
+            textRect.sizeDelta = new(192, 32);
         }
         //
         var text = textObject.AddComponent<Text>();
@@ -322,8 +364,8 @@ internal class LifeSkillWindow
             btnRect.anchorMin = Vector2.zero;
             btnRect.anchorMax = Vector2.right;
             //
-            btnRect.offsetMin = new(10, 10);
-            btnRect.offsetMax = new(-10, 40);
+            btnRect.offsetMin = new(16, 16);
+            btnRect.offsetMax = new(-16, 64);
         }
         var createBtn = createBtnObject.GetComponent<Button>();
         createBtn.onClick.AddListener(() =>

@@ -1,4 +1,6 @@
-﻿using Config;
+﻿using BookLibrary;
+using Config;
+using FrameWork;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,9 +43,9 @@ internal class CombatSkillWindow
             //锚点为parent的四条边
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
-            //与上边距离42
+            //与上边距离
             rect.offsetMin = Vector2.zero;
-            rect.offsetMax = new(0, -42.0f);
+            rect.offsetMax = new(0, -67.2f);
         }
         ShowTipFunc = showTipFunc;
         AddSkillTypeNav(rootObject);
@@ -76,12 +78,12 @@ internal class CombatSkillWindow
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
             //固定高度
-            var navHeight = 30;
+            var navHeight = 48;
             rect.offsetMin = new(0, -navHeight);
             rect.offsetMax = Vector2.zero;
         }
         var layout = skillTypeNav.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         List<string> skillTypeList = new(CombatSkillType.Instance.Count + 1);
         skillTypeList.Add("全部");
         foreach (var combatSkillTypeItem in CombatSkillType.Instance)
@@ -136,12 +138,12 @@ internal class CombatSkillWindow
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = new(0.75f, 1.0f);
             //固定高度
-            var navHeight = 30;
-            rect.offsetMin = new(0, -2 * navHeight - 5);
-            rect.offsetMax = new(0, -navHeight - 5);
+            var navHeight = 48;
+            rect.offsetMin = new(0, -2 * navHeight - 8);
+            rect.offsetMax = new(0, -navHeight - 8);
         }
         var layout = sectTypeNav.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         List<string> sectTypeList = new() { "全", "无" };
         foreach (var organizationItem in Organization.Instance.Where(item => item.IsSect))
         {
@@ -195,9 +197,9 @@ internal class CombatSkillWindow
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             //底部和顶部留下固定距离
-            var navHeight = 30;
-            rect.offsetMin = new(0, navHeight + 5);
-            rect.offsetMax = new(0, -2 * navHeight - 10);
+            var navHeight = 48;
+            rect.offsetMin = new(0, navHeight + 8);
+            rect.offsetMax = new(0, -2 * navHeight - 16);
         }
         //
         var scrollViewObject = UiTool.CreateVerticalScrollView("BookListScrollView");
@@ -214,8 +216,8 @@ internal class CombatSkillWindow
         var scrollRect = scrollViewObject.GetComponent<ScrollRect>();
         bookListContainer = scrollRect.content.gameObject;
         var layout = bookListContainer.AddComponent<GridLayoutGroup>();
-        layout.spacing = new(5, 5);
-        layout.cellSize = new(120, 120 + 20 + 10 + 30 + 10);
+        layout.spacing = new(8, 8);
+        layout.cellSize = new(192, 192 + 32 + 16 + 48 + 16);
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.constraintCount = 6;
     }
@@ -235,12 +237,12 @@ internal class CombatSkillWindow
             rect.anchorMin = Vector2.right;
             rect.anchorMax = Vector2.right;
             //固定大小
-            var (areaWidth, areaHeight) = (190, 30);
+            var (areaWidth, areaHeight) = (304, 48);
             rect.SetSize(new(areaWidth, areaHeight));
             rect.anchoredPosition = new(-areaWidth / 2, areaHeight / 2);
         }
         var layout = pageBtnsObject.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         //添加按钮
         var prevBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "上一页", "PrevPageBtn");
         prevBtnObject.transform.SetParent(pageBtnsObject.transform);
@@ -324,6 +326,7 @@ internal class CombatSkillWindow
         {
             var bookNodeObject = CreateBookNode(i, CurrentItems[i]);
             bookNodeObject.transform.SetParent(bookListContainer.transform);
+            bookNodeObject.transform.localScale = Vector3.one;
         }
         //翻页按钮的状态更新
         if (prevButton != null)
@@ -344,9 +347,43 @@ internal class CombatSkillWindow
     private GameObject CreateBookNode(int index, CombatSkillItem combatSkillItem)
     {
         var bookObject = UiTool.CreateRectObject("#313331".HexStringToColor(), $"Book{index}");
+        //鼠标悬浮区
+        var mouseAreaObject = UiTool.CreateRectObject("MouseArea");
+        mouseAreaObject.transform.SetParent(bookObject.transform);
+        var rect = mouseAreaObject.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            //锚点为parent的左上角
+            rect.anchorMin = Vector2.up;
+            rect.anchorMax = Vector2.up;
+            //
+            var (width, height) = (192, 192 + 32);
+            rect.anchoredPosition = new(width / 2, -height / 2);
+            rect.sizeDelta = new(width, height);
+        }
+        var mouseArea = mouseAreaObject.AddComponent<MouseArea>();
+        var mouseTipManager = SingletonObject.getInstance<MouseTipManager>();
+        mouseArea.EnterAction = () =>
+        {
+            //Debug.Log($"enter {combatSkillItem.Name}(ID: {combatSkillItem.TemplateId})");
+            var argsBox = new ArgumentBox();
+            argsBox.Set("CombatSkillId", combatSkillItem.TemplateId);
+            var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
+            argsBox.Set("CharId", playerId);
+            argsBox.Set("PracticeLevel", 0);
+            argsBox.Set("CheckEquipRequirePracticeLevel", false);
+            argsBox.Set("UsePracticeLevelInDisplayData", false);
+            argsBox.Set("ShowOnlyTemplateInfo", true);
+            mouseTipManager.ShowTips(TipType.CombatSkill, argsBox);
+        };
+        mouseArea.ExitAction = () =>
+        {
+            //Debug.Log($"exit {combatSkillItem.Name}(ID: {combatSkillItem.TemplateId})");
+            mouseTipManager.HideTips(TipType.CombatSkill);
+        };
         //图标区
         var iconObject = UiTool.CreateRectObject("Icon");
-        iconObject.transform.SetParent(bookObject.transform);
+        iconObject.transform.SetParent(mouseAreaObject.transform);
         var iconRect = iconObject.GetComponent<RectTransform>();
         if (iconRect != null)
         {
@@ -354,15 +391,15 @@ internal class CombatSkillWindow
             iconRect.anchorMin = Vector2.up;
             iconRect.anchorMax = Vector2.up;
             //
-            iconRect.anchoredPosition = new(60, -60);
-            iconRect.sizeDelta = new(100, 100);
+            iconRect.anchoredPosition = new(96, -96);
+            iconRect.sizeDelta = new(160, 160);
         }
         var iconImg = iconObject.AddComponent<CImage>();
         iconImg.SetSprite(combatSkillItem.Icon);
         iconImg.SetColor(Colors.Instance.FiveElementsColors[combatSkillItem.FiveElements]);
         //文本区
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(bookObject.transform);
+        textObject.transform.SetParent(mouseAreaObject.transform);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
@@ -370,8 +407,8 @@ internal class CombatSkillWindow
             textRect.anchorMin = Vector2.up;
             textRect.anchorMax = Vector2.up;
             //
-            textRect.anchoredPosition = new(60, -120 - 10);
-            textRect.sizeDelta = new(120, 20);
+            textRect.anchoredPosition = new(96, -192 - 16);
+            textRect.sizeDelta = new(192, 32);
         }
         //
         var text = textObject.AddComponent<Text>();
@@ -389,8 +426,8 @@ internal class CombatSkillWindow
             btnRect.anchorMin = Vector2.zero;
             btnRect.anchorMax = Vector2.right;
             //
-            btnRect.offsetMin = new(10, 10);
-            btnRect.offsetMax = new(-10, 40);
+            btnRect.offsetMin = new(16, 16);
+            btnRect.offsetMax = new(-16, 64);
         }
         var createBtn = createBtnObject.GetComponent<Button>();
         createBtn.onClick.AddListener(() =>

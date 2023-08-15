@@ -16,13 +16,15 @@ internal class MainWindow
 
     public void InitUI()
     {
-        rootObject = CreateCanvas("taiwu.BookLibrary.root", new(1024f, 768f));
+        rootObject = CreateCanvas("taiwu.BookLibrary.root");
         rootObject.SetActive(false);
         var maskObject = CreateMask(rootObject);
         var mainPanel = CreateMainPanel(maskObject, "#1c1c1c".HexStringToColor());
         AddMainTitle(mainPanel, "太吾出版社");
         AddMainContainer(mainPanel);
         AddCloseButton(mainPanel);
+        rootObject.transform.localPosition = Vector3.zero;
+        rootObject.transform.localScale = Vector3.one;
     }
 
     public void DestroyUI()
@@ -43,21 +45,29 @@ internal class MainWindow
     /// 创建画布
     /// </summary>
     /// <param name="objectName"></param>
-    /// <param name="size"></param>
     /// <returns></returns>
-    private GameObject CreateCanvas(string objectName, Vector2 size)
+    private GameObject CreateCanvas(string objectName)
     {
-        var obj = new GameObject(objectName);
-        UnityEngine.Object.DontDestroyOnLoad(obj);
-        //add canvas
+        var obj = UiTool.CreateRectObject(objectName);
+        obj.layer = LayerMask.NameToLayer("UI");
+        //UnityEngine.Object.DontDestroyOnLoad(obj);
+        //parent
+        var parentUI = GameObject.Find("/Camera_UIRoot/Canvas/LayerVeryTop");
+        if (parentUI != null)
+        {
+            obj.transform.SetParent(parentUI.transform);
+        }
+        var rect = obj.GetComponent<RectTransform>();
+        {
+            //锚点为parent
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            //
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
         var canvas = obj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        //
-        var canvasScaler = obj.AddComponent<CanvasScaler>();
-        canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
-        canvasScaler.referencePixelsPerUnit = 100f;
-        canvasScaler.referenceResolution = size;
-        //
         obj.AddComponent<GraphicRaycaster>();
         return obj;
     }
@@ -104,7 +114,7 @@ internal class MainWindow
 
     private void AddCloseButton(GameObject parent)
     {
-        var btnSize = 30;
+        var btnSize = 48;
         //创建关闭按钮
         var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
         btnObj.transform.SetParent(parent.transform);
@@ -143,11 +153,19 @@ internal class MainWindow
             rect.anchorMax = Vector2.one;//(1,1)
             //设置标题框相对于锚点矩形(此时为parent的上边线)左下角、右上角的距离
             //高度固定为30
-            rect.offsetMin = new(0, -30);
+            rect.offsetMin = new(0, -48);
             rect.offsetMax = new(0, 0);
         }
         var textObject = UiTool.CreateRectObject("Text");
         textObject.transform.SetParent(titlePanel.transform);
+        var textRect = textObject.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+        }
         textObject.transform.localPosition = Vector3.zero;
         var textComponent = textObject.AddComponent<Text>();
         UiTool.InitText(textComponent);
@@ -167,9 +185,9 @@ internal class MainWindow
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             //设置间距
-            var padding = 8;
+            var padding = 13;
             rect.offsetMin = new(padding, padding);
-            rect.offsetMax = new(-padding, -padding - 30);
+            rect.offsetMax = new(-padding, -padding - 48);
         }
         string[] bookTypeList = { "功法书", "技艺书" };
         AddBookTypeNav(mainContainer, bookTypeList);
@@ -190,14 +208,14 @@ internal class MainWindow
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.up;//(0,1)
             //固定bookTypeNav大小
-            var navWidth = 156;
-            var navHeight = 34;
+            var navWidth = 250;
+            var navHeight = 54;
             rect.SetSize(new(navWidth, navHeight));
             //距离
             rect.anchoredPosition = new(navWidth / 2, -navHeight / 2);
         }
         var layout = bookTypeNav.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 5.0f;
+        layout.spacing = 8.0f;
         for (var index = 0; index < bookTypeList.Length; index++)
         {
             var bookTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), bookTypeList[index], $"BookType-{index}");
@@ -222,7 +240,7 @@ internal class MainWindow
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
             //
-            rect.offsetMin = new(166, -34);
+            rect.offsetMin = new(265.6f, -54.4f);
             rect.offsetMax = Vector2.zero;
         }
         var textObject = UiTool.CreateRectObject("Text");
@@ -232,8 +250,8 @@ internal class MainWindow
         {
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
-            textRect.offsetMin = new(8, 0);
-            textRect.offsetMax = new(-8, 0);
+            textRect.offsetMin = new(12.8f, 0);
+            textRect.offsetMax = new(-12.8f, 0);
         }
         var text = textObject.AddComponent<Text>();
         UiTool.InitText(text);
