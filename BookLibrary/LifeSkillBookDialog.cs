@@ -239,10 +239,11 @@ internal class LifeSkillBookDialog
             ShowTipFunc?.Invoke(1, "数量不正确");
             return;
         }
-        BookApi.GetBook(playerId, SkillItem!.SkillBookId, BookAmount);
+        //BookApi.GetBook(playerId, SkillItem!.SkillBookId, BookAmount);
+        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, SkillItem!.SkillBookId, BookAmount);
         //关闭当前弹窗
         SetActive(false);
-        ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");
+        //ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");
     }
 
 

@@ -1,7 +1,5 @@
 ﻿using BookLibrary;
 using Config;
-using FrameWork;
-using GameData.Domains.Item.Display;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -298,26 +296,9 @@ internal class LifeSkillWindow
         var mouseTipManager = SingletonObject.getInstance<MouseTipManager>();
         mouseArea.EnterAction = () =>
         {
-            var skillBookConfig = SkillBook.Instance[lifeSkillItem.SkillBookId];
-            var itemData = new ItemDisplayData()
-            {
-                Key = new(skillBookConfig.ItemType, 0, lifeSkillItem.SkillBookId, 0),
-                Amount = 1,
-                Durability = skillBookConfig.MaxDurability,
-                MaxDurability = skillBookConfig.MaxDurability,
-                Weight = skillBookConfig.BaseWeight,
-                Value = skillBookConfig.BaseValue,
-            };
-            var argsBox = new ArgumentBox();
-            argsBox.Set("ItemData", itemData);
-            argsBox.Set("ShowPageInfo", false);
-            argsBox.Set("templateDataOnly", false);
-            mouseTipManager.ShowTips(TipType.SkillBook, argsBox);
+            GameUi.ShowSkillBookTips(lifeSkillItem.SkillBookId);
         };
-        mouseArea.ExitAction = () =>
-        {
-            mouseTipManager.HideTips(TipType.SkillBook);
-        };
+        mouseArea.ExitAction = GameUi.HideSkillBookTips;
         //图标区
         var iconObject = UiTool.CreateRectObject("Icon");
         iconObject.transform.SetParent(mouseAreaObject.transform, false);

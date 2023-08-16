@@ -408,10 +408,11 @@ internal class CombatSkillBookDialog
             //direction: 0正 or 1逆
             pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, NormalPageTypes[pageId - 1]);
         }
-        BookApi.GetBook(playerId, SkillItem!.BookId, BookAmount, pageTypes);
+        //BookApi.GetBook(playerId, SkillItem!.BookId, BookAmount, pageTypes);
+        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, SkillItem!.BookId, BookAmount, pageTypes);
         //关闭当前弹窗
         SetActive(false);
-        ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");
+        //ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");
     }
 
 

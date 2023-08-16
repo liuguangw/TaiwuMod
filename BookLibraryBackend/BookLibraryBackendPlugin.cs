@@ -2,6 +2,7 @@
 using GameData.Domains;
 using GameData.Domains.Character;
 using GameData.Domains.Item;
+using GameData.Domains.Item.Display;
 using GameData.GameDataBridge;
 using GameData.Serializer;
 using GameData.Utilities;
@@ -54,8 +55,8 @@ public class BookLibraryBackendPlugin : TaiwuRemakePlugin
             argsOffset += Serializer.Deserialize(argDataPool, argsOffset, ref pageTypes);
             if (itemType == ItemType.SkillBook)
             {
-                CreateInventoryItem(context, charId, templateId, amount, pageTypes);
-                __result = -1;
+                var itemDisplayDataList = CreateInventoryItem(context, charId, templateId, amount, pageTypes);
+                __result = Serializer.Serialize(itemDisplayDataList, returnDataPool);
                 //false 不继续执行原来的CallMethod函数
                 return false;
             }
@@ -64,10 +65,11 @@ public class BookLibraryBackendPlugin : TaiwuRemakePlugin
         return true;
     }
 
-    private static void CreateInventoryItem(DataContext context, int charId, short templateId, int amount, byte pageTypes)
+    private static List<ItemDisplayData> CreateInventoryItem(DataContext context, int charId, short templateId, int amount, byte pageTypes)
     {
         var character = DomainManager.Character.GetElement_Objects(charId);
         var itemDomain = DomainManager.Item;
+        var itemDisplayDataList = new List<ItemDisplayData>(amount);
         for (int i = 0; i < amount; i++)
         {
             var itemKey = itemDomain.CreateSkillBook(context, templateId, pageTypes, 5);
@@ -78,7 +80,9 @@ public class BookLibraryBackendPlugin : TaiwuRemakePlugin
             bookInfo.SetCurrDurability(durability, context);
             //添加到背包
             character.AddInventoryItem(context, itemKey, 1);
+            itemDisplayDataList.Add(new(bookInfo, 1, charId));
         }
+        return itemDisplayDataList;
     }
 
 }

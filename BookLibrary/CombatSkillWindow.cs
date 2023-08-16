@@ -1,6 +1,5 @@
 ﻿using BookLibrary;
 using Config;
-using FrameWork;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -361,24 +360,15 @@ internal class CombatSkillWindow
             rect.sizeDelta = new(width, height);
         }
         var mouseArea = mouseAreaObject.AddComponent<MouseArea>();
-        var mouseTipManager = SingletonObject.getInstance<MouseTipManager>();
         mouseArea.EnterAction = () =>
         {
             //Debug.Log($"enter {combatSkillItem.Name}(ID: {combatSkillItem.TemplateId})");
-            var argsBox = new ArgumentBox();
-            argsBox.Set("CombatSkillId", combatSkillItem.TemplateId);
-            var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
-            argsBox.Set("CharId", playerId);
-            argsBox.Set("PracticeLevel", 0);
-            argsBox.Set("CheckEquipRequirePracticeLevel", false);
-            argsBox.Set("UsePracticeLevelInDisplayData", false);
-            argsBox.Set("ShowOnlyTemplateInfo", true);
-            mouseTipManager.ShowTips(TipType.CombatSkill, argsBox);
+            GameUi.ShowCombatSkillTips(combatSkillItem.TemplateId);
         };
         mouseArea.ExitAction = () =>
         {
             //Debug.Log($"exit {combatSkillItem.Name}(ID: {combatSkillItem.TemplateId})");
-            mouseTipManager.HideTips(TipType.CombatSkill);
+            GameUi.HideCombatSkillTips();
         };
         //图标区
         var iconObject = UiTool.CreateRectObject("Icon");
