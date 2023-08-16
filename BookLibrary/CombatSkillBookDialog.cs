@@ -61,7 +61,7 @@ internal class CombatSkillBookDialog
         //遮罩层
         rootObject = UiTool.CreateRectObject(new(0, 0, 0, 0.7f), "CombatSkillBookDialogMask");
         rootObject.SetActive(false);
-        rootObject.transform.SetParent(parent.transform);
+        rootObject.transform.SetParent(parent.transform, false);
         var rect = rootObject.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -75,7 +75,7 @@ internal class CombatSkillBookDialog
         ShowTipFunc = showTipFunc;
         //
         var dialogObject = UiTool.CreateRectObject("#4c4c4c".HexStringToColor(), "CombatSkillBookDialog");
-        dialogObject.transform.SetParent(rootObject.transform);
+        dialogObject.transform.SetParent(rootObject.transform, false);
         var dialogRect = dialogObject.GetComponent<RectTransform>();
         if (dialogRect != null)
         {
@@ -110,7 +110,7 @@ internal class CombatSkillBookDialog
     {
 
         var titlePanel = UiTool.CreateRectObject("#302a28".HexStringToColor(), "TitlePanel");
-        titlePanel.transform.SetParent(parent.transform);
+        titlePanel.transform.SetParent(parent.transform, false);
         var rect = titlePanel.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -122,7 +122,7 @@ internal class CombatSkillBookDialog
             rect.offsetMax = new(0, 0);
         }
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(titlePanel.transform);
+        textObject.transform.SetParent(titlePanel.transform, false);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
@@ -165,7 +165,7 @@ internal class CombatSkillBookDialog
         string labelText, string langKey, Color pageBtnTextColor, Action<sbyte> clickAction)
     {
         var pagePanel = UiTool.CreateRectObject(rowObjectName);
-        pagePanel.transform.SetParent(parent.transform);
+        pagePanel.transform.SetParent(parent.transform, false);
         var offsetTop = (48 + 24) * (rowIndex + 1);//距离上方的距离
         var offsetLength = 16;
         var panelHeight = 48;
@@ -179,7 +179,7 @@ internal class CombatSkillBookDialog
             rect.offsetMax = new(-offsetLength, -offsetTop);
         }
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(pagePanel.transform);
+        textObject.transform.SetParent(pagePanel.transform, false);
         var (textWidth, textHeight) = (panelHeight * 3, panelHeight);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
@@ -195,7 +195,7 @@ internal class CombatSkillBookDialog
         textComponent.alignment = TextAnchor.MiddleRight;
         //
         var pageContainerObject = UiTool.CreateRectObject("PageContainer");
-        pageContainerObject.transform.SetParent(pagePanel.transform);
+        pageContainerObject.transform.SetParent(pagePanel.transform, false);
         var containerRect = pageContainerObject.GetComponent<RectTransform>();
         if (containerRect != null)
         {
@@ -209,7 +209,7 @@ internal class CombatSkillBookDialog
         for (sbyte index = 0; index < 5; index++)
         {
             var pageBtnObject = UiTool.CreateButtonObject(NotActiveColor, LocalStringManager.Get($"{langKey}_{index}"), $"PageBtn-{index}");
-            pageBtnObject.transform.SetParent(pageContainerObject.transform);
+            pageBtnObject.transform.SetParent(pageContainerObject.transform, false);
             pageBtnObjects.Add(pageBtnObject);
             var text = pageBtnObject.GetComponentInChildren<Text>();
             text.color = pageBtnTextColor;
@@ -280,7 +280,7 @@ internal class CombatSkillBookDialog
     private void AddAmountInput(GameObject parent)
     {
         var pagePanel = UiTool.CreateRectObject("AmountInputPanel");
-        pagePanel.transform.SetParent(parent.transform);
+        pagePanel.transform.SetParent(parent.transform, false);
         var offsetTop = (48 + 24) * 4;//距离上方的距离
         var offsetLength = 16;
         var panelHeight = 48;
@@ -294,7 +294,7 @@ internal class CombatSkillBookDialog
             rect.offsetMax = new(-offsetLength, -offsetTop);
         }
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(pagePanel.transform);
+        textObject.transform.SetParent(pagePanel.transform, false);
         var (textWidth, textHeight) = (panelHeight * 3, panelHeight);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
@@ -310,7 +310,7 @@ internal class CombatSkillBookDialog
         textComponent.alignment = TextAnchor.MiddleRight;
         //
         var pageContainerObject = UiTool.CreateRectObject("PageContainer");
-        pageContainerObject.transform.SetParent(pagePanel.transform);
+        pageContainerObject.transform.SetParent(pagePanel.transform, false);
         var containerRect = pageContainerObject.GetComponent<RectTransform>();
         if (containerRect != null)
         {
@@ -320,7 +320,7 @@ internal class CombatSkillBookDialog
             containerRect.offsetMax = Vector2.zero;
         }
         var inputFieldObject = UiTool.CreateInputField(Color.white, "输入需要的数量", "InputField");
-        inputFieldObject.transform.SetParent(pageContainerObject.transform);
+        inputFieldObject.transform.SetParent(pageContainerObject.transform, false);
         var inputFieldRect = inputFieldObject.GetComponent<RectTransform>();
         if (inputFieldRect != null)
         {
@@ -354,7 +354,7 @@ internal class CombatSkillBookDialog
     private void AddConfirmBtns(GameObject parent)
     {
         var btnPanel = UiTool.CreateRectObject("BtnPanel");
-        btnPanel.transform.SetParent(parent.transform);
+        btnPanel.transform.SetParent(parent.transform, false);
         var rect = btnPanel.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -368,9 +368,9 @@ internal class CombatSkillBookDialog
         var layout = btnPanel.AddComponent<HorizontalLayoutGroup>();
         layout.spacing = 16;
         var cancelBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "取消", "CancelBtn");
-        cancelBtnObject.transform.SetParent(btnPanel.transform);
+        cancelBtnObject.transform.SetParent(btnPanel.transform, false);
         var confirmBtnObject = UiTool.CreateButtonObject("#ed991c".HexStringToColor(), "确定", "ConfirmBtn");
-        confirmBtnObject.transform.SetParent(btnPanel.transform);
+        confirmBtnObject.transform.SetParent(btnPanel.transform, false);
         var cancelBtn = cancelBtnObject.GetComponent<Button>();
         if (cancelBtn != null)
         {
@@ -420,7 +420,7 @@ internal class CombatSkillBookDialog
         var btnSize = 48;
         //创建关闭按钮
         var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
-        btnObj.transform.SetParent(parent.transform);
+        btnObj.transform.SetParent(parent.transform, false);
         var rect = btnObj.GetComponent<RectTransform>();
         if (rect != null)
         {

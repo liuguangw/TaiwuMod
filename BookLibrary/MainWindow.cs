@@ -18,13 +18,11 @@ internal class MainWindow
     {
         rootObject = CreateCanvas("taiwu.BookLibrary.root");
         rootObject.SetActive(false);
-        var maskObject = CreateMask(rootObject);
-        var mainPanel = CreateMainPanel(maskObject, "#1c1c1c".HexStringToColor());
+        CreateMask(rootObject);
+        var mainPanel = CreateMainPanel(rootObject);
         AddMainTitle(mainPanel, "太吾出版社");
         AddMainContainer(mainPanel);
         AddCloseButton(mainPanel);
-        rootObject.transform.localPosition = Vector3.zero;
-        rootObject.transform.localScale = Vector3.one;
     }
 
     public void DestroyUI()
@@ -50,12 +48,15 @@ internal class MainWindow
     {
         var obj = UiTool.CreateRectObject(objectName);
         obj.layer = LayerMask.NameToLayer("UI");
-        //UnityEngine.Object.DontDestroyOnLoad(obj);
         //parent
         var parentUI = GameObject.Find("/Camera_UIRoot/Canvas/LayerVeryTop");
         if (parentUI != null)
         {
-            obj.transform.SetParent(parentUI.transform);
+            obj.transform.SetParent(parentUI.transform, false);
+        }
+        else
+        {
+            UnityEngine.Object.DontDestroyOnLoad(obj);
         }
         var rect = obj.GetComponent<RectTransform>();
         {
@@ -68,6 +69,16 @@ internal class MainWindow
         }
         var canvas = obj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        //没有找到游戏里的挂载点时,需要使用CanvasScaler来进行缩放
+        if (parentUI == null)
+        {
+            var canvasScaler = obj.AddComponent<CanvasScaler>();
+            canvasScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasScaler.referencePixelsPerUnit = 100;
+            canvasScaler.referenceResolution = new(2560, 1440);
+        }
+        //
         obj.AddComponent<GraphicRaycaster>();
         return obj;
     }
@@ -76,12 +87,11 @@ internal class MainWindow
     /// 创建遮罩层
     /// </summary>
     /// <param name="parent"></param>
-    /// <returns></returns>
-    private GameObject CreateMask(GameObject parent)
+    private void CreateMask(GameObject parent)
     {
         //遮罩层
         var maskObject = UiTool.CreateRectObject(new(0, 0, 0, 0.7f), "Mask");
-        maskObject.transform.SetParent(parent.transform);
+        maskObject.transform.SetParent(parent.transform, false);
         var rect = maskObject.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -92,13 +102,13 @@ internal class MainWindow
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
         }
-        return maskObject;
     }
 
-    private GameObject CreateMainPanel(GameObject parent, Color bgColor)
+    private GameObject CreateMainPanel(GameObject parent)
     {
+        var bgColor = "#1c1c1c".HexStringToColor();
         var mainPanel = UiTool.CreateRectObject(bgColor, "MainPanel");
-        mainPanel.transform.SetParent(parent.transform);
+        mainPanel.transform.SetParent(parent.transform, false);
         var rect = mainPanel.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -117,7 +127,7 @@ internal class MainWindow
         var btnSize = 48;
         //创建关闭按钮
         var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
-        btnObj.transform.SetParent(parent.transform);
+        btnObj.transform.SetParent(parent.transform, false);
         var rect = btnObj.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -144,7 +154,7 @@ internal class MainWindow
     {
 
         var titlePanel = UiTool.CreateRectObject("#302a28".HexStringToColor(), "TitlePanel");
-        titlePanel.transform.SetParent(parent.transform);
+        titlePanel.transform.SetParent(parent.transform, false);
         var rect = titlePanel.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -157,7 +167,7 @@ internal class MainWindow
             rect.offsetMax = new(0, 0);
         }
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(titlePanel.transform);
+        textObject.transform.SetParent(titlePanel.transform, false);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
@@ -177,7 +187,7 @@ internal class MainWindow
     private void AddMainContainer(GameObject parent)
     {
         var mainContainer = UiTool.CreateRectObject("MainContainer");
-        mainContainer.transform.SetParent(parent.transform);
+        mainContainer.transform.SetParent(parent.transform, false);
         var rect = mainContainer.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -200,7 +210,7 @@ internal class MainWindow
     private void AddBookTypeNav(GameObject parent, string[] bookTypeList)
     {
         var bookTypeNav = UiTool.CreateRectObject("BookTypeNav");
-        bookTypeNav.transform.SetParent(parent.transform);
+        bookTypeNav.transform.SetParent(parent.transform, false);
         var rect = bookTypeNav.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -219,7 +229,7 @@ internal class MainWindow
         for (var index = 0; index < bookTypeList.Length; index++)
         {
             var bookTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), bookTypeList[index], $"BookType-{index}");
-            bookTypeBtnObject.transform.SetParent(bookTypeNav.transform);
+            bookTypeBtnObject.transform.SetParent(bookTypeNav.transform, false);
             bookTypeBtnObjects.Add(bookTypeBtnObject);
             var btnComponent = bookTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
@@ -231,7 +241,7 @@ internal class MainWindow
     private void AddTipArea(GameObject parent)
     {
         var tipAreaObject = UiTool.CreateRectObject("#198754".HexStringToColor(), "TipArea");
-        tipAreaObject.transform.SetParent(parent.transform);
+        tipAreaObject.transform.SetParent(parent.transform, false);
         tipAreaObject.SetActive(false);
         var rect = tipAreaObject.GetComponent<RectTransform>();
         if (rect != null)
@@ -244,7 +254,7 @@ internal class MainWindow
             rect.offsetMax = Vector2.zero;
         }
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(tipAreaObject.transform);
+        textObject.transform.SetParent(tipAreaObject.transform, false);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {

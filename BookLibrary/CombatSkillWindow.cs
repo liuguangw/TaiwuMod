@@ -36,7 +36,7 @@ internal class CombatSkillWindow
     {
         rootObject = UiTool.CreateRectObject("CombatSkillWindow");
         rootObject.SetActive(false);
-        rootObject.transform.SetParent(parent.transform);
+        rootObject.transform.SetParent(parent.transform, false);
         var rect = rootObject.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -70,7 +70,7 @@ internal class CombatSkillWindow
     private void AddSkillTypeNav(GameObject parent)
     {
         var skillTypeNav = UiTool.CreateRectObject("SkillTypeNav");
-        skillTypeNav.transform.SetParent(parent.transform);
+        skillTypeNav.transform.SetParent(parent.transform, false);
         var rect = skillTypeNav.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -93,7 +93,7 @@ internal class CombatSkillWindow
         for (var index = 0; index < skillTypeList.Count; index++)
         {
             var skillTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), skillTypeList[index], $"SkillType-{index}");
-            skillTypeBtnObject.transform.SetParent(skillTypeNav.transform);
+            skillTypeBtnObject.transform.SetParent(skillTypeNav.transform, false);
             SkillTypeBtnObjects.Add(skillTypeBtnObject);
             var btnComponent = skillTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
@@ -130,7 +130,7 @@ internal class CombatSkillWindow
     private void AddSectTypeNav(GameObject parent)
     {
         var sectTypeNav = UiTool.CreateRectObject("SectTypeNav");
-        sectTypeNav.transform.SetParent(parent.transform);
+        sectTypeNav.transform.SetParent(parent.transform, false);
         var rect = sectTypeNav.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -152,7 +152,7 @@ internal class CombatSkillWindow
         for (var index = 0; index < sectTypeList.Count; index++)
         {
             var sectTypeBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), sectTypeList[index], $"SectType-{index}");
-            sectTypeBtnObject.transform.SetParent(sectTypeNav.transform);
+            sectTypeBtnObject.transform.SetParent(sectTypeNav.transform, false);
             SectTypeBtnObjects.Add(sectTypeBtnObject);
             var btnComponent = sectTypeBtnObject.GetComponent<Button>();
             var btnIndex = index;
@@ -189,7 +189,7 @@ internal class CombatSkillWindow
     private void AddBookListContainer(GameObject parent)
     {
         var bookListArea = UiTool.CreateRectObject("BookListArea");
-        bookListArea.transform.SetParent(parent.transform);
+        bookListArea.transform.SetParent(parent.transform, false);
         var rect = bookListArea.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -203,7 +203,7 @@ internal class CombatSkillWindow
         }
         //
         var scrollViewObject = UiTool.CreateVerticalScrollView("BookListScrollView");
-        scrollViewObject.transform.SetParent(bookListArea.transform);
+        scrollViewObject.transform.SetParent(bookListArea.transform, false);
         var scrollViewRect = scrollViewObject.GetComponent<RectTransform>();
         if (scrollViewRect != null)
         {
@@ -229,7 +229,7 @@ internal class CombatSkillWindow
     private void AddPageBtns(GameObject parent)
     {
         var pageBtnsObject = UiTool.CreateRectObject("PageBtns");
-        pageBtnsObject.transform.SetParent(parent.transform);
+        pageBtnsObject.transform.SetParent(parent.transform, false);
         var rect = pageBtnsObject.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -237,7 +237,7 @@ internal class CombatSkillWindow
             rect.anchorMin = Vector2.right;
             rect.anchorMax = Vector2.right;
             //固定大小
-            var (areaWidth, areaHeight) = (304, 48);
+            var (areaWidth, areaHeight) = (354, 48);
             rect.SetSize(new(areaWidth, areaHeight));
             rect.anchoredPosition = new(-areaWidth / 2, areaHeight / 2);
         }
@@ -245,7 +245,7 @@ internal class CombatSkillWindow
         layout.spacing = 8.0f;
         //添加按钮
         var prevBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "上一页", "PrevPageBtn");
-        prevBtnObject.transform.SetParent(pageBtnsObject.transform);
+        prevBtnObject.transform.SetParent(pageBtnsObject.transform, false);
         prevButton = prevBtnObject.GetComponent<Button>();
         prevButton.onClick.AddListener(() =>
         {
@@ -259,9 +259,9 @@ internal class CombatSkillWindow
         text.alignment = TextAnchor.MiddleCenter;
         text.color = Color.white;
         pageText = text;
-        pageTextObject.transform.SetParent(pageBtnsObject.transform);
+        pageTextObject.transform.SetParent(pageBtnsObject.transform, false);
         var nextBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "下一页", "NextPageBtn");
-        nextBtnObject.transform.SetParent(pageBtnsObject.transform);
+        nextBtnObject.transform.SetParent(pageBtnsObject.transform, false);
         nextButton = nextBtnObject.GetComponent<Button>();
         nextButton.onClick.AddListener(() =>
         {
@@ -325,8 +325,7 @@ internal class CombatSkillWindow
         for (int i = 0; i < CurrentItems.Count; i++)
         {
             var bookNodeObject = CreateBookNode(i, CurrentItems[i]);
-            bookNodeObject.transform.SetParent(bookListContainer.transform);
-            bookNodeObject.transform.localScale = Vector3.one;
+            bookNodeObject.transform.SetParent(bookListContainer.transform, false);
         }
         //翻页按钮的状态更新
         if (prevButton != null)
@@ -349,7 +348,7 @@ internal class CombatSkillWindow
         var bookObject = UiTool.CreateRectObject("#313331".HexStringToColor(), $"Book{index}");
         //鼠标悬浮区
         var mouseAreaObject = UiTool.CreateRectObject("MouseArea");
-        mouseAreaObject.transform.SetParent(bookObject.transform);
+        mouseAreaObject.transform.SetParent(bookObject.transform, false);
         var rect = mouseAreaObject.GetComponent<RectTransform>();
         if (rect != null)
         {
@@ -383,7 +382,7 @@ internal class CombatSkillWindow
         };
         //图标区
         var iconObject = UiTool.CreateRectObject("Icon");
-        iconObject.transform.SetParent(mouseAreaObject.transform);
+        iconObject.transform.SetParent(mouseAreaObject.transform, false);
         var iconRect = iconObject.GetComponent<RectTransform>();
         if (iconRect != null)
         {
@@ -399,7 +398,7 @@ internal class CombatSkillWindow
         iconImg.SetColor(Colors.Instance.FiveElementsColors[combatSkillItem.FiveElements]);
         //文本区
         var textObject = UiTool.CreateRectObject("Text");
-        textObject.transform.SetParent(mouseAreaObject.transform);
+        textObject.transform.SetParent(mouseAreaObject.transform, false);
         var textRect = textObject.GetComponent<RectTransform>();
         if (textRect != null)
         {
@@ -418,7 +417,7 @@ internal class CombatSkillWindow
         text.color = Colors.Instance.GradeColors[combatSkillItem.Grade];
         //按钮区
         var createBtnObject = UiTool.CreateButtonObject("#9b886d".HexStringToColor(), "获取", "CreateBookBtn");
-        createBtnObject.transform.SetParent(bookObject.transform);
+        createBtnObject.transform.SetParent(bookObject.transform, false);
         var btnRect = createBtnObject.GetComponent<RectTransform>();
         if (btnRect != null)
         {
