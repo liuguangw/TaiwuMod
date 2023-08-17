@@ -26,7 +26,7 @@ return {
 		[1] = "BookLibraryBackend.dll",
 	},
 	GameVersion = "0.0.64.35",
-	Version = "1.0.0.4",
+	Version = "1.0.0.5",
 	TagList = {
 		"Modifications"
 	},

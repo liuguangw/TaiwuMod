@@ -10,9 +10,9 @@ namespace Liuguang.mod.Taiwu.BookLibrary;
 internal class LifeSkillBookDialog
 {
     /// <summary>
-    /// 要发放的书籍
+    /// 要发放的书籍列表
     /// </summary>
-    private LifeSkillItem? SkillItem;
+    private List<LifeSkillItem>? SkillItemList;
     /// <summary>
     /// 数量
     /// </summary>
@@ -21,7 +21,19 @@ internal class LifeSkillBookDialog
     {
         get
         {
-            return SkillItem?.Name ?? "未初始化书籍";
+            if (SkillItemList == null)
+            {
+                return "未初始化书籍";
+            }
+            if (SkillItemList.Count == 0)
+            {
+                return "未初始化书籍";
+            }
+            if (SkillItemList.Count == 1)
+            {
+                return SkillItemList[0].Name;
+            }
+            return "批量获取书籍";
         }
     }
 
@@ -29,11 +41,15 @@ internal class LifeSkillBookDialog
     {
         get
         {
-            if (SkillItem == null)
+            if (SkillItemList == null)
             {
-                return Color.white;
+                return Color.red;
             }
-            return Colors.Instance.GradeColors[SkillItem.Grade];
+            if (SkillItemList.Count == 1)
+            {
+                return Colors.Instance.GradeColors[SkillItemList[0].Grade];
+            }
+            return Color.white;
         }
     }
     private GameObject? rootObject;
@@ -94,12 +110,20 @@ internal class LifeSkillBookDialog
             //锚点为parent的上边线
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
-            //高度固定为30
+            //高度固定为48
             rect.offsetMin = new(0, -48);
             rect.offsetMax = new(0, 0);
         }
         var textObject = UiTool.CreateRectObject("Text");
         textObject.transform.SetParent(titlePanel.transform, false);
+        var textRect = textObject.GetComponent<RectTransform>();
+        if (textRect != null)
+        {
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+        }
         textObject.transform.localPosition = Vector3.zero;
         var textComponent = textObject.AddComponent<Text>();
         UiTool.InitText(textComponent);
@@ -111,7 +135,13 @@ internal class LifeSkillBookDialog
 
     public void SetSkillItem(LifeSkillItem item)
     {
-        SkillItem = item;
+        List<LifeSkillItem> itemList = new() { item };
+        SetSkillItemList(itemList);
+    }
+
+    public void SetSkillItemList(List<LifeSkillItem> itemList)
+    {
+        SkillItemList = itemList;
         if (TitleText != null)
         {
             TitleText.text = BookTitle;
@@ -239,8 +269,17 @@ internal class LifeSkillBookDialog
             ShowTipFunc?.Invoke(1, "数量不正确");
             return;
         }
-        //BookApi.GetBook(playerId, SkillItem!.SkillBookId, BookAmount);
-        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, SkillItem!.SkillBookId, BookAmount);
+        if (SkillItemList == null)
+        {
+            ShowTipFunc?.Invoke(1, "选择的书籍书籍出错");
+            return;
+        }
+        var bookIds = new List<short>();
+        foreach (var item in SkillItemList)
+        {
+            bookIds.Add(item.SkillBookId);
+        }
+        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, bookIds, BookAmount);
         //关闭当前弹窗
         SetActive(false);
         //ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");

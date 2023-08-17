@@ -11,9 +11,9 @@ namespace Liuguang.mod.Taiwu.BookLibrary;
 internal class CombatSkillBookDialog
 {
     /// <summary>
-    /// 要发放的书籍
+    /// 要发放的书籍列表
     /// </summary>
-    private CombatSkillItem? SkillItem;
+    private List<CombatSkillItem>? SkillItemList;
     /// <summary>
     /// 总纲类型 [0 - 4]
     /// </summary>
@@ -30,7 +30,19 @@ internal class CombatSkillBookDialog
     {
         get
         {
-            return SkillItem?.Name ?? "未初始化书籍";
+            if (SkillItemList == null)
+            {
+                return "未初始化书籍";
+            }
+            if (SkillItemList.Count == 0)
+            {
+                return "未初始化书籍";
+            }
+            if (SkillItemList.Count == 1)
+            {
+                return SkillItemList[0].Name;
+            }
+            return "批量获取书籍";
         }
     }
 
@@ -38,11 +50,15 @@ internal class CombatSkillBookDialog
     {
         get
         {
-            if (SkillItem == null)
+            if (SkillItemList == null)
             {
-                return Color.white;
+                return Color.red;
             }
-            return Colors.Instance.GradeColors[SkillItem.Grade];
+            if (SkillItemList.Count == 1)
+            {
+                return Colors.Instance.GradeColors[SkillItemList[0].Grade];
+            }
+            return Color.white;
         }
     }
     private GameObject? rootObject;
@@ -117,7 +133,7 @@ internal class CombatSkillBookDialog
             //锚点为parent的上边线
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
-            //高度固定为30
+            //高度固定为48
             rect.offsetMin = new(0, -48);
             rect.offsetMax = new(0, 0);
         }
@@ -142,7 +158,13 @@ internal class CombatSkillBookDialog
 
     public void SetSkillItem(CombatSkillItem item)
     {
-        SkillItem = item;
+        List<CombatSkillItem> itemList = new() { item };
+        SetSkillItemList(itemList);
+    }
+
+    public void SetSkillItemList(List<CombatSkillItem> itemList)
+    {
+        SkillItemList = itemList;
         if (TitleText != null)
         {
             TitleText.text = BookTitle;
@@ -397,6 +419,11 @@ internal class CombatSkillBookDialog
             ShowTipFunc?.Invoke(1, "数量不正确");
             return;
         }
+        if (SkillItemList == null)
+        {
+            ShowTipFunc?.Invoke(1, "选择的书籍书籍出错");
+            return;
+        }
         //GMFunc.GetItem(playerId, 1, ItemType.SkillBook, combatSkillItem.BookId, null);
         byte pageTypes = 0;
         //总纲
@@ -408,8 +435,12 @@ internal class CombatSkillBookDialog
             //direction: 0正 or 1逆
             pageTypes = SkillBookStateHelper.SetNormalPageType(pageTypes, pageId, NormalPageTypes[pageId - 1]);
         }
-        //BookApi.GetBook(playerId, SkillItem!.BookId, BookAmount, pageTypes);
-        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, SkillItem!.BookId, BookAmount, pageTypes);
+        var bookIds = new List<short>();
+        foreach (var item in SkillItemList)
+        {
+            bookIds.Add(item.BookId);
+        }
+        BookApi.AsyncGetBook(GameUi.ShowItemList, playerId, bookIds, BookAmount, pageTypes);
         //关闭当前弹窗
         SetActive(false);
         //ShowTipFunc?.Invoke(0, $"获得了{SkillItem!.Name} * {BookAmount}");

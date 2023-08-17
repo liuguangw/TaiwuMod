@@ -1,6 +1,7 @@
 ﻿using Config;
 using FrameWork;
 using GameData.Domains.Item.Display;
+using UnityEngine;
 
 namespace Liuguang.mod.Taiwu.BookLibrary;
 
@@ -81,5 +82,47 @@ internal static class GameUi
     {
         var mouseTipManager = SingletonObject.getInstance<MouseTipManager>();
         mouseTipManager.HideTips(TipType.SkillBook);
+    }
+
+    /// <summary>
+    /// 创建一个可勾选框(38*38)
+    /// </summary>
+    /// <param name="parent"></param>
+    /// <param name="objectName"></param>
+    /// <returns></returns>
+    public static GameObject CreateCheckBox(GameObject parent, string objectName = "CheckBox")
+    {
+        var checkBoxObj = UiTool.CreateRectObject(objectName);
+        checkBoxObj.transform.SetParent(parent.transform, false);
+        var checkBox = checkBoxObj.AddComponent<CToggle>();
+        var background = UiTool.CreateRectObject("Background");
+        background.transform.SetParent(checkBoxObj.transform, false);
+        var rect = background.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+        var backgroundImage = background.AddComponent<CImage>();
+        backgroundImage.SetSprite("sp_gouxuankuang_0");
+        checkBox.targetGraphic = backgroundImage;
+        //
+        var checkmark = UiTool.CreateRectObject("Checkmark");
+        checkmark.transform.SetParent(background.transform, false);
+        rect = checkmark.GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new(-3.5f, 2.0f);
+            rect.offsetMax = new(3.5f, 2.0f);
+        }
+        var checkmarkImage = checkmark.AddComponent<CImage>();
+        checkmarkImage.SetSprite("sp_icon_gou");
+        checkBox.graphic = checkmarkImage;
+        //
+        return checkBoxObj;
     }
 }

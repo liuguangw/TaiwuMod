@@ -80,6 +80,76 @@ internal static class UiTool
         return btnObject;
     }
 
+    /// <summary>
+    /// 创建一个可激活按钮
+    /// </summary>
+    /// <param name="btnText"></param>
+    /// <param name="textColor"></param>
+    /// <param name="activeColor"></param>
+    /// <param name="commonColor"></param>
+    /// <param name="name"></param>
+    /// <returns></returns>
+    public static GameObject CreateToggleButton(string btnText, Color textColor, Color activeColor, Color? commonColor = null, string name = "ToggleButton")
+    {
+        var toggleGameObject = CreateRectObject(name);
+        var toggleObject = toggleGameObject.AddComponent<Toggle>();
+        //背景
+        var backgroundObject = new GameObject("Background");
+        backgroundObject.transform.SetParent(toggleGameObject.transform, false);
+        {
+            var rect = backgroundObject.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+        Color backgroundColor;
+        if (commonColor.HasValue)
+        {
+            backgroundColor = commonColor.Value;
+        }
+        else
+        {
+            backgroundColor = activeColor;
+            backgroundColor.SetAlpha(backgroundColor.a * 0.8f);
+        }
+        var backgroundImage = backgroundObject.AddComponent<Image>();
+        backgroundImage.type = Image.Type.Sliced;
+        backgroundImage.color = backgroundColor;
+        //前景
+        var btnObject = new GameObject("Button");
+        btnObject.transform.SetParent(backgroundObject.transform, false);
+        {
+            var rect = btnObject.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+        var btnImage = btnObject.AddComponent<Image>();
+        btnImage.type = Image.Type.Sliced;
+        btnImage.color = activeColor;
+        //text
+        var textObject = new GameObject("Text");
+        textObject.transform.SetParent(btnObject.transform, false);
+        {
+            var rect = textObject.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+        var textComponent = textObject.AddComponent<Text>();
+        InitText(textComponent);
+        textComponent.text = btnText;
+        textComponent.alignment = TextAnchor.MiddleCenter;
+        textComponent.color = textColor;
+        //
+        toggleObject.targetGraphic = backgroundImage;
+        toggleObject.graphic = btnImage;
+        return toggleGameObject;
+    }
+
     private static GameObject CreateScrollbar()
     {
         var scrollbarObject = CreateRectObject(Color.black, "Scrollbar");
