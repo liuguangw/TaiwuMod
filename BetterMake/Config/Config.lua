@@ -3,7 +3,7 @@ return {
 	Author = "liuguang",
 	Cover = "cover.png",
 	GameVersion = "0.0.64.35",
-	Version = "1.0.0.1",
+	Version = "1.0.0.3",
 	TagList = {
 		"Modifications"
 	},
@@ -17,6 +17,7 @@ return {
 以下均可按需要开启或者关闭
 降低制造时的造诣要求
 无需额外建筑，也能制作更好的物品
+制造不需要等待
 太吾村额外建造空间，增加额外的建筑空间上限
 	]],
 	DefaultSettings = 
@@ -35,7 +36,15 @@ return {
 			Key = "UpgradeMakeItem",
 			DefaultValue = false
 		},
-		[3] = {
+		[3] = 
+		{
+			SettingType = "Toggle",
+			DisplayName = "制造不需要等待",
+			Key = "MakeNotCostTime",
+			DefaultValue = false,
+			Description = "制造直接完成,无需等待几个月",
+		},
+		[4] = {
 			SettingType = "Slider",
 			DisplayName = "太吾村额外建造空间",
 			Key = "BuildingSpaceExtra",
