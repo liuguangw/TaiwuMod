@@ -1,7 +1,7 @@
-﻿using HarmonyLib;
-using TaiwuModdingLib.Core.Plugin;
-using GameData.Domains;
+﻿using GameData.Domains;
 using GameData.Domains.Building;
+using HarmonyLib;
+using TaiwuModdingLib.Core.Plugin;
 
 namespace Liuguang.mod.Taiwu.BetterMake;
 
@@ -9,7 +9,13 @@ namespace Liuguang.mod.Taiwu.BetterMake;
 public class BetterMakePlugin : TaiwuRemakePlugin
 {
     #region Config
+    /// <summary>
+    /// 降低造诣要求
+    /// </summary>
     public static bool AttainmentRequirementReduce = false;
+    /// <summary>
+    /// 无需额外建筑
+    /// </summary>
     public static bool UpgradeMakeItem = false;
     public static int BuildingSpaceExtra = 0;
     #endregion
@@ -57,9 +63,9 @@ public class BetterMakePlugin : TaiwuRemakePlugin
     /// </summary>
     private void loadModSetting()
     {
-        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(AttainmentRequirementReduce), ref AttainmentRequirementReduce);
-        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(UpgradeMakeItem), ref UpgradeMakeItem);
-        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(BuildingSpaceExtra), ref BuildingSpaceExtra);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(AttainmentRequirementReduce), ref AttainmentRequirementReduce);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(UpgradeMakeItem), ref UpgradeMakeItem);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(BuildingSpaceExtra), ref BuildingSpaceExtra);
     }
 
     /// <summary>
@@ -72,13 +78,32 @@ public class BetterMakePlugin : TaiwuRemakePlugin
         var (reduceVal, upgrade) = __result;
         if (AttainmentRequirementReduce)
         {
-            reduceVal += 300;
+            reduceVal += 500;
         }
         if (UpgradeMakeItem)
         {
             upgrade = true;
         }
         __result = (reduceVal, upgrade);
+    }
+
+    /// <summary>
+    /// 制造条件检测
+    /// </summary>
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(BuildingDomain), "CheckMakeCondition")]
+    public static void Building_CheckMakeCondition_PostPatch(MakeConditionArguments makeConditionArguments,ref bool __result)
+    {
+        if (!AttainmentRequirementReduce)
+        {
+            return;
+        }
+        //角色id检测
+        var charId = makeConditionArguments.CharId;
+        if (DomainManager.Taiwu.GetTaiwuCharId() == charId)
+        {
+            __result = true;
+        }
     }
 
 }

@@ -1,20 +1,24 @@
 return {
 	Title = "制造优化",
+	Author = "liuguang",
+	Cover = "cover.png",
+	GameVersion = "0.0.64.35",
+	Version = "1.0.0.1",
+	TagList = {
+		"Modifications"
+	},
 	BackendPlugins = 
 	{
 		[1] = "BetterMake.dll"
 	},
-	Author = "liuguang",
-	Cover = "cover.png",
 --	FileId = 3011575950,
-	Source = 1,
+--	Source = 1,
 	Description = [[
 以下均可按需要开启或者关闭
 降低制造时的造诣要求
 无需额外建筑，也能制作更好的物品
 太吾村额外建造空间，增加额外的建筑空间上限
 	]],
-	GameVersion = "0.0.63.42",
 	DefaultSettings = 
 	{
 		[1] = 
