@@ -1,7 +1,7 @@
-﻿using HarmonyLib;
-using TaiwuModdingLib.Core.Plugin;
-using GameData.Domains;
+﻿using GameData.Domains;
 using GameData.Domains.Taiwu;
+using HarmonyLib;
+using TaiwuModdingLib.Core.Plugin;
 //using GameData.Utilities;
 using TaiwuSkillBreakPlate = GameData.Domains.Taiwu.SkillBreakPlate;
 
@@ -13,6 +13,7 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     #region Config
     public static bool BreakNotCostedStep = false;
     public static bool FastPractice = false;
+    public static bool ResetBreakPlate = false;
     #endregion
 
     private Harmony? harmony;
@@ -40,8 +41,9 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     /// </summary>
     private void loadModSetting()
     {
-        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(BreakNotCostedStep), ref BreakNotCostedStep);
-        DomainManager.Mod.GetSetting(base.ModIdStr, nameof(FastPractice), ref FastPractice);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(BreakNotCostedStep), ref BreakNotCostedStep);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(FastPractice), ref FastPractice);
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(ResetBreakPlate), ref ResetBreakPlate);
     }
 
     /// <summary>
@@ -51,7 +53,6 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     [HarmonyPatch(typeof(TaiwuDomain), "InitSkillBreakPlate")]
     public static void Taiwu_InitSkillBreakPlate_PostPatch(TaiwuSkillBreakPlate plate)
     {
-        //AdaptableLog.Info("BetterLearnPlugin 突破界面初始化");
         foreach (var gridItems in plate.Grids)
         {
             foreach (var grid in gridItems)
@@ -59,6 +60,10 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
                 //全部格子显示
                 grid.State = 0;
             }
+        }
+        if (ResetBreakPlate)
+        {
+            BreakPlateResetTool.ProcessResetBreakPlate(plate);
         }
     }
 
