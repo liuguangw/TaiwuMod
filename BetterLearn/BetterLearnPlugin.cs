@@ -1,4 +1,4 @@
-﻿using GameData.Domains;
+using GameData.Domains;
 using GameData.Domains.Taiwu;
 using HarmonyLib;
 using TaiwuModdingLib.Core.Plugin;
@@ -53,12 +53,18 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     [HarmonyPatch(typeof(TaiwuDomain), "InitSkillBreakPlate")]
     public static void Taiwu_InitSkillBreakPlate_PostPatch(TaiwuSkillBreakPlate plate)
     {
-        foreach (var gridItems in plate.Grids)
+        for (byte rowIndex = 0; rowIndex < plate.Height; rowIndex++)
         {
-            foreach (var grid in gridItems)
+            for (byte colIndex = 0; colIndex < plate.Width; colIndex++)
             {
-                //全部格子显示
-                grid.State = 0;
+                var grid = plate.Grids[rowIndex][colIndex];
+                if ((rowIndex % 2 != 0) || (colIndex < plate.Width - 1))
+                {
+                    //var debugGridConfig = Config.SkillBreakGridType.Instance[grid.TemplateId];
+                    //AdaptableLog.TagInfo($"Grids[{rowIndex}][{colIndex}]", $"Name={debugGridConfig.Name}, State={grid.State}, TemplateId={grid.TemplateId}");
+                    //显示格子
+                    grid.State = 0;
+                }
             }
         }
         if (ResetBreakPlate)
