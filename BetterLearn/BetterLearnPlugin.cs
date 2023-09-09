@@ -11,6 +11,7 @@ namespace Liuguang.mod.Taiwu.BetterLearn;
 public class BetterLearnPlugin : TaiwuRemakePlugin
 {
     #region Config
+    public static bool BetterRate = false;
     public static bool BreakNotCostedStep = false;
     public static bool FastPractice = false;
     public static bool ResetBreakPlate = false;
@@ -41,6 +42,7 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     /// </summary>
     private void loadModSetting()
     {
+        DomainManager.Mod.GetSetting(ModIdStr, nameof(BetterRate), ref BetterRate);
         DomainManager.Mod.GetSetting(ModIdStr, nameof(BreakNotCostedStep), ref BreakNotCostedStep);
         DomainManager.Mod.GetSetting(ModIdStr, nameof(FastPractice), ref FastPractice);
         DomainManager.Mod.GetSetting(ModIdStr, nameof(ResetBreakPlate), ref ResetBreakPlate);
@@ -80,8 +82,11 @@ public class BetterLearnPlugin : TaiwuRemakePlugin
     [HarmonyPatch(typeof(TaiwuDomain), "UpdateBreakPlateTotalStepAndSuccessRate")]
     public static void Taiwu_UpdateBreakPlateTotalStepAndSuccessRate_PostPatch(short skillTemplateId, TaiwuDomain __instance)
     {
-        var plate = __instance.GetElement_SkillBreakPlateDict(skillTemplateId);
-        plate.BaseSuccessRate = byte.MaxValue;
+        if (BetterRate)
+        {
+            var plate = __instance.GetElement_SkillBreakPlateDict(skillTemplateId);
+            plate.BaseSuccessRate = byte.MaxValue;
+        }
     }
 
     /// <summary>

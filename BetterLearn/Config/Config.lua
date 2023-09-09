@@ -3,7 +3,7 @@ return {
 	Author = "liuguang",
 	Cover = "cover.png",
 	GameVersion = "0.0.64.35",
-	Version = "1.0.0.2",
+	Version = "1.0.0.3",
 	TagList = {
 		"Modifications"
 	},
@@ -19,27 +19,32 @@ return {
 如果开启了突破格重排,那么金色格子会被移动到更方便连接的位置,而不会随机分布.
 
 以下功能可以根据需要来选择开启或者关闭:
+优化突破概率
 突破不消耗次数
 修习一键100%
 突破格重排
 ]],
 	DefaultSettings = 
 	{
-		[1] = 
+		{
+			SettingType = "Toggle",
+			DisplayName = "优化优化概率",
+			Description = "提高突破成功的概率",
+			Key = "BetterRate",
+			DefaultValue = true
+		},
 		{
 			SettingType = "Toggle",
 			DisplayName = "突破不消耗次数",
 			Key = "BreakNotCostedStep",
 			DefaultValue = false
 		},
-		[2] = 
 		{
 			SettingType = "Toggle",
 			DisplayName = "修习一键100%",
 			Key = "FastPractice",
 			DefaultValue = false
 		},
-		[3] = 
 		{
 			SettingType = "Toggle",
 			DisplayName = "突破格重排",
