@@ -1,9 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-	<Import Project="../GamePath.props"/>
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<PropertyGroup>
+		<AssemblyTitle>制造优化</AssemblyTitle>
+		<AssemblyVersion>1.0.0.4</AssemblyVersion>
+		<Company>流光</Company>
 	</PropertyGroup>
 	<ItemGroup>
 		<Reference Include="0Harmony">

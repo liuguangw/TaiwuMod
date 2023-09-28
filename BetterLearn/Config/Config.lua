@@ -2,8 +2,8 @@ return {
 	Title = "突破优化",
 	Author = "liuguang",
 	Cover = "cover.png",
-	GameVersion = "0.0.64.35",
-	Version = "1.0.0.3",
+	GameVersion = "0.0.66.46",
+	Version = "1.0.0.4",
 	TagList = {
 		"Modifications"
 	},
