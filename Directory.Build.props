@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <!--Game path-->
-    <TaiwuGamePath>E:\SteamLibrary\steamapps\common\The Scroll Of Taiwu</TaiwuGamePath>
+    <TaiwuGamePath>F:\SteamLibrary\steamapps\common\The Scroll Of Taiwu</TaiwuGamePath>
     <TaiwuGameLibPath>$(TaiwuGamePath)\The Scroll of Taiwu_Data\Managed</TaiwuGameLibPath>
     <TaiwuGameBackendLibPath>$(TaiwuGamePath)\Backend</TaiwuGameBackendLibPath>
   </PropertyGroup>

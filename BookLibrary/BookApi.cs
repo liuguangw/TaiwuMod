@@ -1,4 +1,4 @@
-﻿using GameData.Domains;
+using GameData.Domains;
 using GameData.Domains.Character;
 using GameData.Domains.Item;
 using GameData.Domains.Item.Display;
@@ -34,8 +34,8 @@ internal static class BookApi
     /// <param name="pageTypes"></param>
     public static void AsyncGetBook(Action<List<ItemDisplayData>> onGetAction, int playerId, List<short> bookIds, int amount, byte pageTypes = 0)
     {
-        var dispatcher = SingletonObject.getInstance<AsynchMethodDispatcher>();
-        dispatcher.AsynchMethodCall(DomainHelper.DomainIds.Character, CharacterDomainHelper.MethodIds.CreateInventoryItem,
+        var dispatcher = SingletonObject.getInstance<AsyncMethodDispatcher>();
+        dispatcher.AsyncMethodCall(DomainHelper.DomainIds.Character, CharacterDomainHelper.MethodIds.CreateInventoryItem,
             playerId, ItemType.SkillBook, bookIds, amount, pageTypes,
             (argsOffset, dataPool) =>
             {
