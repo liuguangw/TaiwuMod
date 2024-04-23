@@ -25,11 +25,11 @@ return {
 	BackendPlugins = {
 		[1] = "BookLibraryBackend.dll",
 	},
-	GameVersion = "0.0.68.37",
+	GameVersion = "0.0.70.49",
 	Version = "1.0.0.7",
 	TagList = {
 		"Modifications"
 	},
---	Source = 1,
---	FileId = 3019439426,
+	Source = 0,
+	FileId = 3019439426,
 }

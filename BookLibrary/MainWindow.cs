@@ -1,3 +1,4 @@
+using GameData.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,7 +21,7 @@ internal class MainWindow
         rootObject.SetActive(false);
         CreateMask(rootObject);
         var mainPanel = CreateMainPanel(rootObject);
-        AddMainTitle(mainPanel, "Ì«Îá³ö°æÉç");
+        AddMainTitle(mainPanel, "å¤ªå¾å‡ºç‰ˆç¤¾");
         AddMainContainer(mainPanel);
         AddCloseButton(mainPanel);
     }
@@ -36,11 +37,21 @@ internal class MainWindow
 
     public void SwitchActiveStatus()
     {
-        rootObject?.SetActive(!rootObject.activeSelf);
+        if(rootObject is null) {  return; }
+        if (!rootObject.activeSelf)
+        {
+            var playerId = SingletonObject.getInstance<BasicGameData>().TaiwuCharId;
+            if (playerId <= 0)
+            {
+                AdaptableLog.Error("å¿…é¡»è¿›å…¥æ¸¸æˆæ‰èƒ½ä½¿ç”¨mod");
+                return;
+            }
+        }
+        rootObject.SetActive(!rootObject.activeSelf);
     }
 
     /// <summary>
-    /// ´´½¨»­²¼
+    /// åˆ›å»ºç”»å¸ƒ
     /// </summary>
     /// <param name="objectName"></param>
     /// <returns></returns>
@@ -60,7 +71,7 @@ internal class MainWindow
         }
         var rect = obj.GetComponent<RectTransform>();
         {
-            //ÃªµãÎªparent
+            //é”šç‚¹ä¸ºparent
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             //
@@ -69,7 +80,7 @@ internal class MainWindow
         }
         var canvas = obj.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        //Ã»ÓĞÕÒµ½ÓÎÏ·ÀïµÄ¹ÒÔØµãÊ±,ĞèÒªÊ¹ÓÃCanvasScalerÀ´½øĞĞËõ·Å
+        //æ²¡æœ‰æ‰¾åˆ°æ¸¸æˆé‡Œçš„æŒ‚è½½ç‚¹æ—¶,éœ€è¦ä½¿ç”¨CanvasScaleræ¥è¿›è¡Œç¼©æ”¾
         if (parentUI == null)
         {
             var canvasScaler = obj.AddComponent<CanvasScaler>();
@@ -84,18 +95,18 @@ internal class MainWindow
     }
 
     /// <summary>
-    /// ´´½¨ÕÚÕÖ²ã
+    /// åˆ›å»ºé®ç½©å±‚
     /// </summary>
     /// <param name="parent"></param>
     private void CreateMask(GameObject parent)
     {
-        //ÕÚÕÖ²ã
+        //é®ç½©å±‚
         var maskObject = UiTool.CreateRectObject(new(0, 0, 0, 0.7f), "Mask");
         maskObject.transform.SetParent(parent.transform, false);
         var rect = maskObject.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªparent
+            //é”šç‚¹ä¸ºparent
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
             //
@@ -112,10 +123,10 @@ internal class MainWindow
         var rect = mainPanel.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //Ãªµã·¶Î§,Ö÷´°Ìå´óĞ¡×ÔÊÊÓ¦(width=60%,height=72%)
+            //é”šç‚¹èŒƒå›´,ä¸»çª—ä½“å¤§å°è‡ªé€‚åº”(width=60%,height=72%)
             rect.anchorMin = new(0.2f, 0.14f);
             rect.anchorMax = new(0.8f, 0.86f);
-            //ÓëÃªµãµÄËÄÌõ±ßÖØºÏ
+            //ä¸é”šç‚¹çš„å››æ¡è¾¹é‡åˆ
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
         }
@@ -125,22 +136,22 @@ internal class MainWindow
     private void AddCloseButton(GameObject parent)
     {
         var btnSize = 48;
-        //´´½¨¹Ø±Õ°´Å¥
+        //åˆ›å»ºå…³é—­æŒ‰é’®
         var btnObj = UiTool.CreateButtonObject("#ff0000".HexStringToColor(), "X", "CloseBtn");
         btnObj.transform.SetParent(parent.transform, false);
         var rect = btnObj.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªÓÒÉÏ½Ç
+            //é”šç‚¹ä¸ºå³ä¸Šè§’
             rect.anchorMin = Vector2.one;
             rect.anchorMax = Vector2.one;
-            //ÉèÖÃ¹Ø±Õ°´Å¥µÄ´óĞ¡
+            //è®¾ç½®å…³é—­æŒ‰é’®çš„å¤§å°
             rect.SetSize(new(btnSize, btnSize));
-            //°´Å¥ÖĞĞÄµãÏà¶ÔÓÚÃªµãµÄ¶¨Î»
+            //æŒ‰é’®ä¸­å¿ƒç‚¹ç›¸å¯¹äºé”šç‚¹çš„å®šä½
             rect.anchoredPosition = new(-btnSize / 2, -btnSize / 2);
         }
         var closeBtn = btnObj.GetComponent<Button>();
-        //ÑÕÉ«
+        //é¢œè‰²
         var btnColors = closeBtn.colors;
         btnColors.normalColor = new(1.0f, 0f, 0f, 0.5f);
         btnColors.highlightedColor = new(1.0f, 0f, 0f, 1.0f);
@@ -158,11 +169,11 @@ internal class MainWindow
         var rect = titlePanel.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªparentµÄÉÏ±ßÏß
+            //é”šç‚¹ä¸ºparentçš„ä¸Šè¾¹çº¿
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
-            //ÉèÖÃ±êÌâ¿òÏà¶ÔÓÚÃªµã¾ØĞÎ(´ËÊ±ÎªparentµÄÉÏ±ßÏß)×óÏÂ½Ç¡¢ÓÒÉÏ½ÇµÄ¾àÀë
-            //¸ß¶È¹Ì¶¨Îª30
+            //è®¾ç½®æ ‡é¢˜æ¡†ç›¸å¯¹äºé”šç‚¹çŸ©å½¢(æ­¤æ—¶ä¸ºparentçš„ä¸Šè¾¹çº¿)å·¦ä¸‹è§’ã€å³ä¸Šè§’çš„è·ç¦»
+            //é«˜åº¦å›ºå®šä¸º30
             rect.offsetMin = new(0, -48);
             rect.offsetMax = new(0, 0);
         }
@@ -191,15 +202,15 @@ internal class MainWindow
         var rect = mainContainer.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªparentµÄËÄÌõ±ßÏß
+            //é”šç‚¹ä¸ºparentçš„å››æ¡è¾¹çº¿
             rect.anchorMin = Vector2.zero;
             rect.anchorMax = Vector2.one;
-            //ÉèÖÃ¼ä¾à
+            //è®¾ç½®é—´è·
             var padding = 13;
             rect.offsetMin = new(padding, padding);
             rect.offsetMax = new(-padding, -padding - 48);
         }
-        string[] bookTypeList = { "¹¦·¨Êé", "¼¼ÒÕÊé" };
+        string[] bookTypeList = { "åŠŸæ³•ä¹¦", "æŠ€è‰ºä¹¦" };
         AddBookTypeNav(mainContainer, bookTypeList);
         AddTipArea(mainContainer);
         combatSkillWindow.InitUI(mainContainer, ShowTip);
@@ -214,14 +225,14 @@ internal class MainWindow
         var rect = bookTypeNav.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªparentµÄ×óÉÏ½Ç
+            //é”šç‚¹ä¸ºparentçš„å·¦ä¸Šè§’
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.up;//(0,1)
-            //¹Ì¶¨bookTypeNav´óĞ¡
+            //å›ºå®šbookTypeNavå¤§å°
             var navWidth = 250;
             var navHeight = 54;
             rect.SetSize(new(navWidth, navHeight));
-            //¾àÀë
+            //è·ç¦»
             rect.anchoredPosition = new(navWidth / 2, -navHeight / 2);
         }
         var layout = bookTypeNav.AddComponent<HorizontalLayoutGroup>();
@@ -246,7 +257,7 @@ internal class MainWindow
         var rect = tipAreaObject.GetComponent<RectTransform>();
         if (rect != null)
         {
-            //ÃªµãÎªparentµÄÉÏ±ß
+            //é”šç‚¹ä¸ºparentçš„ä¸Šè¾¹
             rect.anchorMin = Vector2.up;//(0,1)
             rect.anchorMax = Vector2.one;//(1,1)
             //
